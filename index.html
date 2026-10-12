@@ -1,879 +1,1971 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>叉车基础配置文档（可编辑版）</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: "Microsoft YaHei", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
-            background: #f0f2f5;
-            color: #333;
-            line-height: 1.8;
-        }
-        /* 顶部工具栏 */
-        .toolbar {
-            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
-            color: #fff;
-            padding: 12px 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-        }
-        .toolbar .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .toolbar h1 {
-            font-size: 20px;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-        .toolbar-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .toolbar-actions button {
-            background: rgba(255,255,255,0.15);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.3);
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-family: inherit;
-        }
-        .toolbar-actions button:hover {
-            background: rgba(255,255,255,0.25);
-            border-color: #fff;
-        }
-        .toolbar-actions button.btn-download {
-            background: #4caf50;
-            border-color: #4caf50;
-        }
-        .toolbar-actions button.btn-download:hover {
-            background: #43a047;
-        }
-        .toolbar-actions button.btn-reset {
-            background: #e53935;
-            border-color: #e53935;
-        }
-        .toolbar-actions button.btn-reset:hover {
-            background: #d32f2f;
-        }
-        /* 编辑模式提示 */
-        .edit-banner {
-            background: #fff3e0;
-            border-bottom: 1px solid #ffe0b2;
-            color: #e65100;
-            text-align: center;
-            padding: 6px 0;
-            font-size: 13px;
-            display: none;
-        }
-        .edit-banner.active { display: block; }
-        .edit-banner strong { margin: 0 4px; }
-        /* 容器 */
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        /* 目录区域 */
-        .toc-section {
-            background: #fff;
-            border-radius: 10px;
-            padding: 30px;
-            margin: 30px auto;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-        }
-        .toc-section h2 {
-            font-size: 20px;
-            color: #1a237e;
-            margin-bottom: 18px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e8eaf6;
-        }
-        .toc-categories {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 18px;
-        }
-        .toc-category {
-            background: #f8f9ff;
-            border: 1px solid #e8eaf6;
-            border-radius: 8px;
-            padding: 16px 20px;
-            transition: all 0.2s;
-        }
-        .toc-category:hover {
-            border-color: #7986cb;
-            box-shadow: 0 2px 8px rgba(41,94,255,0.1);
-        }
-        .toc-category h3 {
-            font-size: 15px;
-            color: #283593;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .toc-category h3::before {
-            content: '';
-            display: inline-block;
-            width: 4px;
-            height: 16px;
-            background: #5c6bc0;
-            border-radius: 2px;
-        }
-        .toc-category ul { list-style: none; padding-left: 10px; }
-        .toc-category li { margin: 4px 0; }
-        .toc-category li a {
-            color: #444;
-            text-decoration: none;
-            font-size: 14px;
-            padding: 2px 0;
-            display: block;
-            transition: color 0.2s;
-        }
-        .toc-category li a:hover { color: #283593; }
-        /* 主内容区 */
-        .main-content { padding-bottom: 60px; }
-        .content-section {
-            background: #fff;
-            border-radius: 10px;
-            padding: 30px;
-            margin: 24px 0;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-        }
-        .content-section h2 {
-            font-size: 22px;
-            color: #1a237e;
-            margin-bottom: 6px;
-            padding-bottom: 12px;
-            border-bottom: 3px solid #5c6bc0;
-        }
-        .content-section h3 {
-            font-size: 16px;
-            color: #283593;
-            margin: 20px 0 10px 0;
-            padding-left: 10px;
-            border-left: 4px solid #7986cb;
-        }
-        .content-section p, .content-section li {
-            font-size: 14px;
-            color: #555;
-            margin: 6px 0;
-        }
-        .content-section ul { padding-left: 20px; }
-        .content-section li { margin: 4px 0; }
-        /* 表格样式 */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 16px 0;
-            font-size: 13px;
-            border-radius: 6px;
-            overflow: hidden;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-        }
-        .data-table thead th {
-            background: linear-gradient(135deg, #283593, #3949ab);
-            color: #fff;
-            padding: 10px 14px;
-            text-align: center;
-            font-weight: 500;
-            white-space: nowrap;
-        }
-        .data-table tbody td {
-            padding: 9px 14px;
-            border-bottom: 1px solid #e8eaf6;
-            color: #444;
-            vertical-align: top;
-        }
-        .data-table tbody tr:nth-child(even) { background: #f5f7ff; }
-        .data-table tbody tr:hover { background: #eef0ff; }
-        .data-table td:first-child { white-space: nowrap; text-align: center; }
-        /* 编辑态高亮 */
-        [contenteditable="true"] {
-            outline: 2px dashed #7986cb;
-            outline-offset: 2px;
-            border-radius: 3px;
-            background: #fffde7;
-        }
-        [contenteditable="true"]:focus {
-            outline: 2px solid #5c6bc0;
-            background: #fff9c4;
-        }
-        .data-table tbody td[contenteditable="true"] {
-            background: #fffde7;
-        }
-        .data-table tbody td[contenteditable="true"]:focus {
-            background: #fff9c4;
-        }
-        /* 注释/提示框 */
-        .note-box {
-            background: #fff8e1;
-            border-left: 4px solid #ffc107;
-            padding: 12px 16px;
-            margin: 14px 0;
-            border-radius: 0 6px 6px 0;
-            font-size: 13px;
-            color: #666;
-        }
-        .note-box strong { color: #e65100; }
-        /* 故障表格特殊样式 */
-        .fault-table tbody tr { transition: background 0.2s; }
-        .fault-table tbody tr:hover { background: #fff3e0 !important; }
-        .fault-code {
-            font-weight: 600;
-            color: #c62828;
-            font-family: "Consolas", monospace;
-        }
-        /* 页脚 */
-        .footer {
-            text-align: center;
-            padding: 30px 0;
-            color: #999;
-            font-size: 12px;
-            border-top: 1px solid #e0e0e0;
-            margin-top: 40px;
-        }
-        /* 锚点定位偏移 */
-        section[id] { scroll-margin-top: 80px; }
-        /* 响应式 */
-        @media (max-width: 768px) {
-            .toolbar .container { flex-direction: column; gap: 10px; }
-            .toc-categories { grid-template-columns: 1fr; }
-            .data-table { font-size: 12px; }
-            .data-table thead th, .data-table tbody td { padding: 7px 10px; }
-        }
-        /* Toast 提示 */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: #333;
-            color: #fff;
-            padding: 10px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            z-index: 9999;
-            opacity: 0;
-            transition: all 0.3s;
-            pointer-events: none;
-        }
-        .toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多舵轮基础配置 · 表格展示</title>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+        background-color: #f0f2f5;
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .sidebar {
+        width: 280px;
+        background-color: #2c3e50;
+        color: #ecf0f1;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+        z-index: 10;
+        overflow-y: auto;
+        flex-shrink: 0;
+    }
+
+    .sidebar-header {
+        padding: 24px 20px;
+        border-bottom: 1px solid #3e4f5f;
+    }
+
+    .sidebar-header h2 {
+        font-size: 1.3rem;
+        font-weight: 500;
+        letter-spacing: 1px;
+        color: #bdc3c7;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .sidebar-header h2 span {
+        background: #34495e;
+        padding: 4px 8px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        color: #95a5a6;
+    }
+
+    .nav-list {
+        flex: 1;
+        padding: 16px 0;
+    }
+
+    .nav-item {
+        padding: 14px 20px;
+        margin: 4px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #b0bec5;
+        transition: all 0.15s;
+        font-weight: 450;
+        font-size: 0.95rem;
+        border-left: 4px solid transparent;
+    }
+
+    .nav-item:hover {
+        background-color: #34495e;
+        color: #ecf0f1;
+    }
+
+    .nav-item.active {
+        background-color: #3b4f63;
+        color: white;
+        border-left-color: #7f8c8d;
+        font-weight: 500;
+    }
+
+    .nav-item i {
+        font-style: normal;
+        font-size: 1.1rem;
+        opacity: 0.7;
+        width: 20px;
+        text-align: center;
+    }
+
+    .admin-section {
+        padding: 20px 16px;
+        border-top: 1px solid #3e4f5f;
+        background-color: #25323e;
+    }
+
+    .login-btn {
+        width: 100%;
+        padding: 12px 0;
+        background-color: #3f5e7a;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        letter-spacing: 0.5px;
+    }
+
+    .login-btn:hover {
+        background-color: #4f7396;
+    }
+
+    .admin-badge {
+        margin-top: 12px;
+        font-size: 0.8rem;
+        color: #95a5a6;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .admin-badge .logged-in {
+        color: #2ecc71;
+        font-weight: 500;
+    }
+
+    .main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background-color: #f5f7fa;
+        min-width: 0;
+    }
+
+    .topbar {
+        background-color: #ffffff;
+        padding: 16px 28px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        border-bottom: 1px solid #d0d7de;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+        gap: 12px;
+    }
+
+    .edit-toggle {
+        background-color: #e9edf2;
+        border: 1px solid #cbd5e1;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 500;
+        color: #1e293b;
+        cursor: pointer;
+        transition: 0.15s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+    }
+
+    .edit-toggle:hover {
+        background-color: #dce2e9;
+    }
+
+    .edit-toggle.active {
+        background-color: #3f5e7a;
+        color: white;
+        border-color: #3f5e7a;
+    }
+
+    .edit-toggle:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background-color: #e9edf2;
+        color: #94a3b8;
+    }
+
+    .apply-btn {
+        background-color: #2ecc71;
+        border: 1px solid #27ae60;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 500;
+        color: white;
+        cursor: pointer;
+        transition: 0.15s;
+        display: none;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+    }
+
+    .apply-btn:hover {
+        background-color: #27ae60;
+    }
+
+    .reset-btn {
+        background-color: #fee2e2;
+        border: 1px solid #fecaca;
+        padding: 10px 18px;
+        border-radius: 10px;
+        font-weight: 500;
+        color: #b91c1c;
+        cursor: pointer;
+        transition: 0.15s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+    }
+
+    .reset-btn:hover {
+        background-color: #fecaca;
+    }
+
+    .content-panel {
+        flex: 1;
+        overflow: auto;
+        padding: 20px 24px 28px 24px;
+        background-color: #f5f7fa;
+    }
+
+    .section-card {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e2e8f0;
+        margin-bottom: 24px;
+        overflow: hidden;
+        transition: box-shadow 0.2s;
+    }
+
+    .section-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .section-card.editable {
+        box-shadow: 0 0 0 2px #94a3b8, 0 4px 14px rgba(0, 0, 0, 0.06);
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.83rem;
+        table-layout: fixed;
+        word-break: break-word;
+    }
+
+    table td:first-child,
+    table th:first-child {
+        width: 150px;
+        min-width: 100px;
+        max-width: 180px;
+    }
+
+    th {
+        background-color: #edf2f7;
+        color: #1e293b;
+        font-weight: 600;
+        padding: 9px 14px;
+        text-align: left;
+        border-bottom: 2px solid #cbd5e1;
+        border-right: 1px solid #d0d7de;
+        font-size: 0.78rem;
+        letter-spacing: 0.3px;
+        white-space: nowrap;
+    }
+
+    th:last-child {
+        border-right: none;
+    }
+
+    td {
+        padding: 8px 14px;
+        border-bottom: 1px solid #e2e8f0;
+        border-right: 1px solid #e9edf2;
+        color: #1e293b;
+        vertical-align: top;
+        background-color: #ffffff;
+        line-height: 1.5;
+        word-break: break-word;
+        white-space: pre-wrap;
+    }
+
+    td:last-child {
+        border-right: none;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    tr:hover td {
+        background-color: #fafcff;
+    }
+
+    .section-header-row td {
+        background-color: #dde4eb;
+        font-weight: 700;
+        font-size: 0.92rem;
+        color: #1e2a36;
+        letter-spacing: 0.6px;
+        padding: 11px 14px;
+        border-bottom: 2px solid #b8c5d3;
+    }
+
+    .column-header-row td {
+        background-color: #eef2f7;
+        font-weight: 600;
+        color: #26394b;
+        font-size: 0.8rem;
+        border-bottom: 2px solid #cbd5e1;
+    }
+
+    .note-row td {
+        background-color: #fafbfc;
+        color: #4a5568;
+        font-size: 0.82rem;
+        line-height: 1.6;
+        padding: 12px 16px;
+    }
+
+    td[contenteditable="true"] {
+        background-color: #fefce8;
+        outline: none;
+        transition: background 0.1s;
+        border-radius: 4px;
+        box-shadow: inset 0 0 0 1px #fde047;
+    }
+
+    td[contenteditable="true"]:focus {
+        background-color: #fef9c3;
+        box-shadow: inset 0 0 0 2px #eab308;
+    }
+
+    .empty-msg {
+        padding: 60px;
+        text-align: center;
+        color: #64748b;
+        font-size: 1rem;
+    }
+
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 18px;
+        padding: 12px 18px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+        font-size: 0.88rem;
+    }
+
+    .breadcrumb-item {
+        color: #3f5e7a;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: 0.15s;
+        font-weight: 500;
+    }
+
+    .breadcrumb-item:hover {
+        background-color: #eef2f7;
+    }
+
+    .breadcrumb-item.active {
+        color: #1e293b;
+        background-color: #e9edf2;
+        cursor: default;
+    }
+
+    .breadcrumb-sep {
+        color: #94a3b8;
+        font-size: 0.8rem;
+    }
+
+    .text-content-wrapper {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        border: 1px solid #e2e8f0;
+        padding: 22px 26px;
+        margin-bottom: 20px;
+    }
+
+    .text-content-header {
+        font-size: 0.82rem;
+        color: #64748b;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .text-content-header .hint {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        font-weight: 400;
+    }
+
+    .text-content-body {
+        font-size: 0.9rem;
+        color: #1e293b;
+        line-height: 1.7;
+        white-space: pre-wrap;
+        word-break: break-word;
+        min-height: 70px;
+        padding: 12px 16px;
+        background-color: #fafbfc;
+        border-radius: 8px;
+        border: 1px solid #e9edf2;
+        transition: all 0.15s;
+    }
+
+    .text-content-body[contenteditable="true"] {
+        background-color: #fefce8;
+        outline: none;
+        box-shadow: inset 0 0 0 2px #fde047;
+        cursor: text;
+    }
+
+    .text-content-body[contenteditable="true"]:focus {
+        background-color: #fef9c3;
+        box-shadow: inset 0 0 0 2px #eab308;
+    }
+
+    .text-empty {
+        color: #94a3b8;
+        font-style: italic;
+    }
+
+    .btn-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+
+    @media (max-width: 900px) {
+        .btn-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+        .btn-grid { grid-template-columns: 1fr; }
+    }
+
+    .nav-btn {
+        position: relative;
+        background-color: #ffffff;
+        border: 1px solid #d0d7de;
+        border-radius: 12px;
+        padding: 20px 18px;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-align: left;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-height: 88px;
+    }
+
+    .nav-btn:hover {
+        border-color: #94a3b8;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-1px);
+    }
+
+    .nav-btn .btn-title {
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #1e293b;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+
+    .nav-btn .btn-sub {
+        font-size: 0.78rem;
+        color: #64748b;
+        line-height: 1.4;
+    }
+
+    .nav-btn .btn-edit-hint {
+        position: absolute;
+        top: 6px;
+        right: 8px;
+        font-size: 0.7rem;
+        color: #94a3b8;
+        opacity: 0;
+        transition: opacity 0.15s;
+    }
+
+    .nav-btn.editable .btn-edit-hint {
+        opacity: 1;
+    }
+
+    .nav-btn .btn-title[contenteditable="true"] {
+        background-color: #fefce8;
+        outline: none;
+        border-radius: 4px;
+        box-shadow: inset 0 0 0 1px #fde047;
+        padding: 2px 4px;
+        margin: -2px -4px;
+    }
+
+    .nav-btn .btn-title[contenteditable="true"]:focus {
+        background-color: #fef9c3;
+        box-shadow: inset 0 0 0 2px #eab308;
+    }
+
+    .delete-btn {
+        position: absolute;
+        bottom: 6px;
+        right: 8px;
+        background-color: #fee2e2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.15s;
+        font-weight: 500;
+    }
+
+    .nav-btn.editable .delete-btn {
+        opacity: 1;
+    }
+
+    .delete-btn:hover {
+        background-color: #fecaca;
+    }
+
+    .add-btn-card {
+        background-color: #f8fafc;
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        padding: 20px 18px;
+        cursor: pointer;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: #64748b;
+        font-weight: 500;
+        font-size: 0.9rem;
+        min-height: 88px;
+    }
+
+    .add-btn-card:hover {
+        border-color: #94a3b8;
+        background-color: #eef2f7;
+        color: #3f5e7a;
+    }
+
+    .level-info {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-left: auto;
+    }
+
+    .table-config-hint {
+        background-color: #eef6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-bottom: 16px;
+        font-size: 0.85rem;
+        color: #1e40af;
+        line-height: 1.7;
+    }
+
+    .table-config-hint code {
+        background-color: #dbeafe;
+        padding: 1px 6px;
+        border-radius: 4px;
+        font-family: 'Consolas', monospace;
+        font-size: 0.82rem;
+    }
+
+    .level-col {
+        background-color: #f8fafc;
+    }
+
+    .text-col {
+        background-color: #fefce8;
+    }
+
+    .add-row-btn {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        background-color: #f0f9ff;
+        border: 2px dashed #7dd3fc;
+        border-radius: 8px;
+        color: #0284c7;
+        font-weight: 500;
+        cursor: pointer;
+        margin-top: 12px;
+        font-size: 0.9rem;
+        transition: 0.15s;
+    }
+
+    .add-row-btn:hover {
+        background-color: #e0f2fe;
+        border-color: #38bdf8;
+    }
+
+    .remove-row-btn {
+        background-color: #fee2e2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        padding: 3px 10px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .remove-row-btn:hover {
+        background-color: #fecaca;
+    }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #eef2f6; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #b0bec5; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #90a4ae; }
+
+    @media (max-width: 800px) {
+        .sidebar { width: 200px; }
+        .nav-item { font-size: 0.8rem; padding: 10px 12px; }
+        th, td { padding: 6px 10px; font-size: 0.72rem; }
+        table td:first-child,
+        table th:first-child { width: 100px; max-width: 120px; }
+    }
+</style>
 </head>
 <body>
 
-<!-- 编辑模式提示 -->
-<div class="edit-banner" id="editBanner">
-    <strong>✏️ 编辑模式已开启</strong> — 点击任意文字或表格内容即可直接修改，修改后自动保存到浏览器
-</div>
-
-<!-- 工具栏 -->
-<nav class="toolbar">
-    <div class="container">
-        <h1>叉车基础配置文档</h1>
-        <div class="toolbar-actions">
-            <button id="btnEdit" onclick="toggleEditMode()">✏️ 开始编辑</button>
-            <button class="btn-download" onclick="downloadHTML()">💾 下载更新后的文档</button>
-            <button onclick="copyShareLink()">📋 复制分享链接</button>
-            <button class="btn-reset" onclick="resetAll()">🔄 恢复默认</button>
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <h2>📁 配置文件 <span>多文件</span></h2>
+    </div>
+    <div class="nav-list" id="navList"></div>
+    <div class="admin-section">
+        <button class="login-btn" id="loginBtn" type="button">🔐 管理员登录</button>
+        <div class="admin-badge" id="adminBadge">
+            <span>未登录 · 只读模式</span>
         </div>
     </div>
-</nav>
+</aside>
 
-<div class="container main-content">
-
-<!-- ==================== 目录 ==================== -->
-<div class="toc-section" id="toc">
-    <h2>📋 文档目录</h2>
-    <div class="toc-categories">
-        <div class="toc-category">
-            <h3>避障与雷达</h3>
-            <ul>
-                <li><a href="#obstacle-channel">避障通道说明</a></li>
-                <li><a href="#radar-calibration">雷达标定</a></li>
-            </ul>
-        </div>
-        <div class="toc-category">
-            <h3>相机与路径</h3>
-            <ul>
-                <li><a href="#camera-params">相机识别参数</a></li>
-                <li><a href="#path-markers">路径标记位配置</a></li>
-            </ul>
-        </div>
-        <div class="toc-category">
-            <h3>运动参数</h3>
-            <ul>
-                <li><a href="#lift-params">举升参数</a></li>
-                <li><a href="#speed-params">运行速度参数</a></li>
-            </ul>
-        </div>
-        <div class="toc-category">
-            <h3>通信与网络</h3>
-            <ul>
-                <li><a href="#comm-params">通信参数</a></li>
-                <li><a href="#ip-address">IP地址配置</a></li>
-            </ul>
-        </div>
-        <div class="toc-category">
-            <h3>自动门与故障</h3>
-            <ul>
-                <li><a href="#doormode">自动门配置</a></li>
-                <li><a href="#faults">常见故障排查</a></li>
-            </ul>
+<div class="main">
+    <div class="topbar">
+        <button class="apply-btn" id="applyBtn">✓ 应用到常见故障</button>
+        <button class="reset-btn" id="resetBtn" style="display:none;">🔄 恢复默认</button>
+        <button class="edit-toggle" id="editToggle" disabled>✏️ 编辑模式</button>
+    </div>
+    <div class="content-panel">
+        <div id="tableWrapper">
+            <div class="empty-msg">加载中...</div>
         </div>
     </div>
 </div>
-
-<!-- ==================== 一、避障与雷达 ==================== -->
-<section id="obstacle" class="content-section">
-    <h2>一、避障与雷达</h2>
-
-    <h3 id="obstacle-channel">1.1 避障通道说明</h3>
-    <p>AGV界面避障通道与兴颂避障雷达通道的对应关系如下表所示：</p>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>AGV界面显示避障通道</th>
-                <th>功能</th>
-                <th>兴颂避障通道</th>
-                <th>对应关系(从1开始)</th>
-                <th>对应关系(从0开始)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr><td>0</td><td>低速前进</td><td>63</td><td>1</td><td>0</td></tr>
-            <tr><td>1</td><td>高速前进</td><td>62</td><td>2</td><td>1</td></tr>
-            <tr><td>2</td><td>低速后退</td><td>61</td><td>3</td><td>2</td></tr>
-            <tr><td>3</td><td>高速后退</td><td>60</td><td>4</td><td>3</td></tr>
-            <tr><td>4</td><td>手动区域/原地旋转</td><td>59</td><td>5</td><td>4</td></tr>
-            <tr><td>5</td><td>自定义区域</td><td>58</td><td>6</td><td>5</td></tr>
-            <tr><td>6</td><td>自定义区域</td><td>57</td><td>7</td><td>6</td></tr>
-            <tr><td>7</td><td>取/放货</td><td>56</td><td>8</td><td>7</td></tr>
-            <tr><td>8</td><td>自定义区域</td><td>55</td><td>9</td><td>8</td></tr>
-            <tr><td>9</td><td>自定义区域</td><td>54</td><td>10</td><td>9</td></tr>
-            <tr><td>10</td><td>自定义区域</td><td>53</td><td>11</td><td>10</td></tr>
-            <tr><td>11</td><td>自定义区域</td><td>52</td><td>12</td><td>11</td></tr>
-            <tr><td>12</td><td>自定义区域</td><td>51</td><td>13</td><td>12</td></tr>
-            <tr><td>13</td><td>自定义区域</td><td>50</td><td>14</td><td>13</td></tr>
-            <tr><td>14</td><td>自定义区域</td><td>49</td><td>15</td><td>14</td></tr>
-        </tbody>
-    </table>
-
-    <div class="note-box">
-        <strong>注意事项：</strong>
-        <ul>
-            <li>取/放货通道（通道7）条件：① 取放货任务带bit13/14/15标记位；② 低于运行高度"Lifter load run height"；③ 如果取放货路径勾了bit10，且配置了避障通道，优先bit10功能。</li>
-            <li>目前使用的雷达中只有兴颂避障是从大往小的通道设定，其他无特别说明的避障雷达按照正常的小往大通道进行配置。</li>
-            <li>车身所有避障雷达均共用同一个避障通道，无单独给某个雷达设定特殊通道的功能。</li>
-            <li>带安全型避障雷达的通道不一致（S300：8个；基恩士：16个）。</li>
-            <li>雷达ID定义：ID0-顶部导航雷达；ID1-预留；ID2-左侧；ID3-前侧；ID4-右侧；ID5-斜照。</li>
-        </ul>
-    </div>
-
-    <h3 id="radar-calibration">1.2 雷达标定</h3>
-    <div class="note-box">
-        <strong>标定条件：</strong>重新安装雷达 / 调节过雷达安装位置 / 角度都需要重新去标定雷达。<br>
-        <strong>要求：</strong>通过远程客户端的键盘去控制叉车标定。
-    </div>
-</section>
-
-<!-- ==================== 二、相机与路径 ==================== -->
-<section id="camera" class="content-section">
-    <h2>二、相机与路径</h2>
-
-    <h3 id="camera-params">2.1 相机识别参数</h3>
-    <p>相机识别参数说明如下：</p>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>参数编号</th>
-                <th>参数说明</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr><td>1</td><td>相机安装角度（弧度）：如果识别取货时栈板有角度偏差，可通过调整此参数</td></tr>
-            <tr><td>3</td><td>相机安装位置Y轴：如果识别取货左右有偏差，可通过调整此参数</td></tr>
-            <tr><td>4</td><td>栈板插孔高度</td></tr>
-            <tr><td>5</td><td>栈板插孔宽度</td></tr>
-            <tr><td>6</td><td>栈板内宽</td></tr>
-            <tr><td>7</td><td>开启相机识别功能</td></tr>
-            <tr><td>8</td><td>填cam_pose_fix_x（当取货时，栈板端面无法接触到叉尖货物检测开关/撞击栈板时，调整此参数）</td></tr>
-        </tbody>
-    </table>
-
-    <div class="note-box">
-        <strong>重要提示：</strong>
-        <ul>
-            <li>栈板插孔的高度和宽度需根据实际现场的栈板尺寸做调整。</li>
-            <li>调整相机安装位置前先调整角度（V）再调整左右（Y）。</li>
-            <li>识别距离约束：叉尖到栈板端面最短50-70cm，最远1.8m，栈板偏差角度越大，识别距离越长。</li>
-            <li>路线要求：禁止原地旋转后直接进入识别路线，原地旋转完后需走一段直线再进入识别路线。</li>
-            <li>路径文件：top_cam_ground_coeff.ini</li>
-            <li>相机标定后检查标定数据，如偏差大则重新标定。</li>
-        </ul>
-    </div>
-
-    <h3 id="path-markers">2.2 路径标记位配置</h3>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>标记位</th>
-                <th>功能说明</th>
-                <th>应用范围</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr><td>bit2</td><td>反光柱定位；使用反光柱定位需扫描到≥3个柱子才有效</td><td>路径段勾选</td></tr>
-            <tr><td>bit9</td><td>屏蔽叉尖检测传感器</td><td>路径段勾选</td></tr>
-            <tr><td>bit10</td><td>选用特定避障——在路径信息"用户储存信息2"中填对应的避障通道</td><td>路径段/站点选用</td></tr>
-            <tr><td>bit11</td><td>盲取功能，只要在路径上触发了货物检测弹片就认为取到货</td><td>取货路径段和站点勾选</td></tr>
-            <tr><td>bit12</td><td>开启相机识别功能，反之禁用相机识别功能</td><td>取放货路径段和取放货站点勾选</td></tr>
-            <tr><td>bit13</td><td>允许叉臂提前升/降到指定高度</td><td>路径勾选</td></tr>
-            <tr><td>bit14, bit15</td><td>取放货路段，叉臂禁止升降动作</td><td>路径勾选</td></tr>
-        </tbody>
-    </table>
-
-    <div class="note-box">
-        <strong>补充说明：</strong>
-        <ul>
-            <li>如果带栈板识别功能，叉尖-栈板端面距离 ≥ 0.5m。</li>
-            <li>建议末端速度0.3，前一段路径0.4/0.5，或者更慢。</li>
-        </ul>
-    </div>
-</section>
-
-<!-- ==================== 三、运动参数 ==================== -->
-<section id="motion" class="content-section">
-    <h2>三、运动参数</h2>
-
-    <h3 id="lift-params">3.1 举升参数</h3>
-    <div class="note-box">
-        <strong>注意：</strong>该序列表不代表最终这个参数的位置，根据实际英文来对应位置！默认厂内已调好该部分参数，无特殊情况下勿动！
-    </div>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>参数编号</th>
-                <th>参数说明</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr><td>65</td><td>自动模式叉臂下降最大速度</td></tr>
-            <tr><td>66</td><td>自动模式叉臂下降最小速度（距离目标高度100mm启用），同上升</td></tr>
-            <tr><td>67</td><td>自动模式叉臂预举升高度；单位：m</td></tr>
-            <tr><td>68</td><td>自动模式上升最大速度</td></tr>
-            <tr><td>69</td><td>自动模式上升最小速度</td></tr>
-            <tr><td>70</td><td>自动模式叉臂默认运行高度；单位：m</td></tr>
-            <tr><td>71</td><td>手动模式叉臂设定举升最高高度（仅适用JT手柄）；单位：m</td></tr>
-            <tr><td>98</td><td>自动模式叉臂设定举升最高高度，默认情况下需比上限位传感器高度低2cm；单位：m</td></tr>
-        </tbody>
-    </table>
-
-    <h3>参数说明</h3>
-    <ul>
-        <li><strong>预举升高度：</strong>取货/卸货的二次抬升高度。
-            <ul>
-                <li>取货：调度下发500mm的高度进行取货，AGV进入到工位后以500mm+预举升高度把货物取出来。</li>
-                <li>卸货：调度下发500mm的高度进行卸货，AGV进入工位前会抬升至500+预举升高度进入到工位；进入工位后，减去预举升高度放下托盘。</li>
-            </ul>
-        </li>
-        <li><strong>自动默认运行高度：</strong>当AGV完成取卸货后，正常行驶在路径上时叉臂会以设定的运行高度去行驶。</li>
-    </ul>
-
-    <h3 id="speed-params">3.2 运行速度参数</h3>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>参数编号</th>
-                <th>参数说明</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr><td>116</td><td>自动空载原地旋转速度</td></tr>
-            <tr><td>117</td><td>自动满载原地旋转速度</td></tr>
-            <tr><td>118</td><td>自动空载直线速度</td></tr>
-            <tr><td>119</td><td>自动满载直线速度</td></tr>
-            <tr><td>125</td><td>手动转弯速度；仅适用JT手柄</td></tr>
-            <tr><td>126</td><td>手动直线速度；仅适用JT手柄</td></tr>
-        </tbody>
-    </table>
-</section>
-
-<!-- ==================== 四、通信与网络 ==================== -->
-<section id="comm" class="content-section">
-    <h2>四、通信与网络</h2>
-
-    <h3 id="comm-params">4.1 通信参数</h3>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>参数编号</th>
-                <th>参数说明</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr><td>52</td><td>与调度通信端口</td></tr>
-            <tr><td>53</td><td>中控电脑IP地址</td></tr>
-            <tr><td>54</td><td>与调度通信AGV_ID</td></tr>
-            <tr><td>55</td><td>通信模式：0-TCPS模式；1-TCPC模式；6-远程客户端模式；默认：0</td></tr>
-        </tbody>
-    </table>
-
-    <h3 id="ip-address">4.2 IP地址配置</h3>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>模块</th>
-                <th>模块地址</th>
-                <th>工控机地址</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr><td>雷达</td><td>192.168.31.10</td><td>192.168.31.1</td></tr>
-            <tr><td>单片机板</td><td>—</td><td>192.168.30.1</td></tr>
-            <tr><td>相机</td><td>192.168.40.10</td><td>192.168.40.1</td></tr>
-        </tbody>
-    </table>
-</section>
-
-<!-- ==================== 五、自动门配置 ==================== -->
-<section id="doormode" class="content-section">
-    <h2>五、自动门配置</h2>
-
-    <h3>5.1 基本配置</h3>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>参数编号</th>
-                <th>参数说明</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr><td>102</td><td>开启自动门模式（1）</td></tr>
-        </tbody>
-    </table>
-
-    <div class="note-box">
-        <strong>目标路径：</strong>/release/config/mfio_control_data.ini
-    </div>
-
-    <h3>5.2 MFIO 参数说明</h3>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>参数名</th>
-                <th>说明</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr><td>io_input</td><td>IO输入位（对应MFIO接的IN位——没接填0）</td></tr>
-            <tr><td>io_output</td><td>IO输出位（对应MFIO接的OUT位）</td></tr>
-            <tr><td>mfio_group_id</td><td>电梯ID（默认0）</td></tr>
-            <tr><td>mfio_id</td><td>MFIO_ID（MFIO从机ID）</td></tr>
-            <tr><td>route_id</td><td>自动门路径ID（需要交互的路径ID），0/-1无效</td></tr>
-            <tr><td>node_id</td><td>节点ID，0/-1无效</td></tr>
-        </tbody>
-    </table>
-
-    <h3>5.3 IO 对应关系</h3>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>IO</th>
-                <th>out1</th>
-                <th>out2</th>
-                <th>out3</th>
-                <th>out4</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr><td>io_output</td><td>1</td><td>2</td><td>4</td><td>8</td></tr>
-        </tbody>
-    </table>
-
-    <div class="note-box">
-        <strong>配置举例：</strong>
-        <ul>
-            <li>电梯开门到位信号接MFIO的IN1，电梯开门信号接OUT1。</li>
-            <li>路径ID：56——这段路径需要请求电梯开门到位信号和收到开门到位信号之后才会释放AGV继续行走，所以 io_input = in1, io_output = out1。</li>
-            <li>如果控制out4，io_output就填8；如果需要同时控制out1和out4，io_output就填9（相加）。以此类推，io_input同理。</li>
-        </ul>
-    </div>
-
-    <h3>5.4 路线配置</h3>
-    <p>需在路径配置中设置自动门相关的路由和节点信息，确保AGV经过指定路径时能正确请求电梯开门。</p>
-</section>
-
-<!-- ==================== 六、常见故障排查 ==================== -->
-<section id="faults" class="content-section">
-    <h2>六、常见故障排查</h2>
-    <table class="data-table fault-table">
-        <thead>
-            <tr>
-                <th>序号</th>
-                <th>故障代码</th>
-                <th>故障描述</th>
-                <th>故障分析</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>1</td>
-                <td class="fault-code">4306</td>
-                <td>库位路线保护，路线后无举升任务</td>
-                <td>路线bit14标记位绑定取卸货任务；检查路线是否误勾选/任务下错</td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td class="fault-code">4309</td>
-                <td>取货异常，货叉弹片未正确触发或栈板损坏</td>
-                <td>未取到货，货物检测弹片未被触发；检查任务是否下错、货物放置太靠后</td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td class="fault-code">4111</td>
-                <td>不在路径上，AGV在路径前</td>
-                <td>AGV不在站点上，在任务站点后；检测定位是否抖动</td>
-            </tr>
-            <tr>
-                <td>4</td>
-                <td class="fault-code">4307</td>
-                <td>货叉已有货物占据，无法继续执行取货/举升任务</td>
-                <td>货物检测传感器被触发，车载状态为带载状态；检查弹片是否卡住、任务是否下错、货物是否太靠前、手动操作后任务未清除</td>
-            </tr>
-            <tr>
-                <td>5</td>
-                <td class="fault-code">4104</td>
-                <td>激光置信度过低</td>
-                <td>环境匹配度过低；检查定位抖动、定位丢失</td>
-            </tr>
-            <tr>
-                <td>6</td>
-                <td class="fault-code">4308</td>
-                <td>叉尖障碍物保护触发</td>
-                <td>叉尖传感器检测到东西；清除杂物</td>
-            </tr>
-            <tr>
-                <td>7</td>
-                <td class="fault-code">4411</td>
-                <td>远程IO通讯超时异常</td>
-                <td>MFIO没有通讯</td>
-            </tr>
-            <tr>
-                <td>8</td>
-                <td class="fault-code">4313</td>
-                <td>货物状态变化异常，载货状态货物弹片松开</td>
-                <td>载货状态下货物检测弹片状态变化；检查货物运行过程中是否有移位</td>
-            </tr>
-            <tr>
-                <td>9</td>
-                <td class="fault-code">4303</td>
-                <td>举升位置误差超限</td>
-                <td>AGV偏离站点；检测定位/环境是否正常</td>
-            </tr>
-            <tr>
-                <td>10</td>
-                <td class="fault-code">4407</td>
-                <td>驱动电源旁路开关激活，无法进入自动模式</td>
-                <td>自动模式下旁路开关被激活；打到OFF档</td>
-            </tr>
-            <tr>
-                <td>11</td>
-                <td class="fault-code">2702</td>
-                <td>碰撞触发</td>
-                <td>安全触边被触发</td>
-            </tr>
-        </tbody>
-    </table>
-</section>
-
-</div>
-
-<!-- 页脚 -->
-<div class="footer">
-    <p>叉车基础配置文档 — 按功能分类整理 | 点击"开始编辑"可在线修改内容 | 修改后点击"下载更新后的文档"保存</p>
-</div>
-
-<!-- Toast 提示 -->
-<div class="toast" id="toast"></div>
 
 <script>
-// ========== 编辑模式控制 ==========
-let editMode = false;
+// ============================================================
+// 1. 默认数据生成
+// ============================================================
 
-function toggleEditMode() {
-    editMode = !editMode;
-    const banner = document.getElementById('editBanner');
-    const btn = document.getElementById('btnEdit');
-    const editableElements = document.querySelectorAll('.content-section h2, .content-section h3, .content-section p, .content-section li, .content-section strong, .data-table td, .data-table th, .note-box p, .note-box li, .note-box strong, .footer p');
-
-    if (editMode) {
-        banner.classList.add('active');
-        btn.textContent = '✅ 停止编辑';
-        btn.style.background = '#4caf50';
-        editableElements.forEach(el => {
-            el.setAttribute('contenteditable', 'true');
-        });
-        showToast('编辑模式已开启，点击任意文字即可修改');
-    } else {
-        banner.classList.remove('active');
-        btn.textContent = '✏️ 开始编辑';
-        btn.style.background = '';
-        editableElements.forEach(el => {
-            el.removeAttribute('contenteditable');
-        });
-        saveToLocalStorage();
-        showToast('已保存修改到浏览器');
-    }
+// ★ 新表格列结构：一行一个检查项
+// 0=一级按钮（故障代码）
+// 1=二级文本（故障提示）
+// 2=二级文本（故障原因）
+// 3=二级按钮（检查方向）- 每个检查项一行
+// 4=三级按钮（处理方法）
+// 5=四级按钮（备注）
+function createDefaultFaultTable() {
+    return [
+        ["1101", "前雷达通讯异常", "系统无法获取前雷达数据", "1、雷达是否正常上电", "", ""],
+        ["1101", "前雷达通讯异常", "系统无法获取前雷达数据", "2、检查PC端连接雷达的网口设置是否正确", "", ""],
+        ["1101", "前雷达通讯异常", "系统无法获取前雷达数据", "3、检查雷达设置IP是否正确", "", ""],
+        ["1101", "前雷达通讯异常", "系统无法获取前雷达数据", "4、检查PC端连接雷达的网线是否受损", "", ""],
+        ["1101", "前雷达通讯异常", "系统无法获取前雷达数据", "5、检查雷达驱动是否正确", "", ""],
+        ["1102", "后雷达通讯异常", "系统无法获取前雷达数据", "1、雷达是否正常上电", "", ""],
+        ["1102", "后雷达通讯异常", "系统无法获取前雷达数据", "2、检查PC端连接雷达的网口设置是否正确", "", ""],
+        ["1102", "后雷达通讯异常", "系统无法获取前雷达数据", "3、检查雷达设置IP是否正确", "", ""],
+        ["1102", "后雷达通讯异常", "系统无法获取前雷达数据", "4、检查PC端连接雷达的网线是否受损", "", ""],
+        ["1102", "后雷达通讯异常", "系统无法获取前雷达数据", "5、检查雷达驱动是否正确", "", ""],
+        ["1201", "**伺服驱动器通讯异常", "系统无法获取驱动器数据", "1、检查驱动器是否正确上电", "", "故障信息中会指明是什么连接哪一个电机的驱动器。例如“舵轮驱动器通讯异常，id:0”，此时需要检查的就是0号舵轮连接的驱动器。"],
+        ["1201", "**伺服驱动器通讯异常", "系统无法获取驱动器数据", "2、检查驱动器CAN总线线束是否正常", "", "故障信息中会指明是什么连接哪一个电机的驱动器。例如“舵轮驱动器通讯异常，id:0”，此时需要检查的就是0号舵轮连接的驱动器。"],
+        ["1201", "**伺服驱动器通讯异常", "系统无法获取驱动器数据", "3、检查驱动器通讯参数设置是否正确", "", "故障信息中会指明是什么连接哪一个电机的驱动器。例如“舵轮驱动器通讯异常，id:0”，此时需要检查的就是0号舵轮连接的驱动器。"],
+        ["1202", "**编码器通讯异常", "系统无法获取编码器数据", "1、检查编码器是否正确上电", "", ""],
+        ["1202", "**编码器通讯异常", "系统无法获取编码器数据", "2、检查编码器通讯线束是否正常", "", ""],
+        ["1202", "**编码器通讯异常", "系统无法获取编码器数据", "3、检查编码器通讯参数设置是否正确", "", ""],
+        ["1301", "电池通讯异常", "系统无法获取电池BMS数据", "1、检查电池通讯线束是否正常", "", ""],
+        ["1301", "电池通讯异常", "系统无法获取电池BMS数据", "2、检查电池通讯协议是否正确", "", ""],
+        ["1401", "下位机通讯异常,误差时间:", "系统无法获取下位机数据", "1、下位机是否正常上电、运行灯正常闪烁", "", ""],
+        ["1401", "下位机通讯异常,误差时间:", "系统无法获取下位机数据", "2、检查PC端连接下位机的网口设置是否正确", "", ""],
+        ["1401", "下位机通讯异常,误差时间:", "系统无法获取下位机数据", "3、检查PC端连接下位机的网线是否受损", "", ""],
+        ["1601", "\"上限位信号异常\"", "双通型光电信号异常", "1、检查光电是否能正常感应", "", ""],
+        ["1601", "\"上限位信号异常\"", "双通型光电信号异常", "2、检查光电信号线束是否受损", "", ""],
+        ["1602", "\"下限位信号异常\"", "双通型光电信号异常", "1、检查光电是否能正常感应", "", ""],
+        ["1602", "\"下限位信号异常\"", "双通型光电信号异常", "2、检查光电信号线束是否受损", "", ""],
+        ["1701", "\"拓展板通讯异常\"", "系统无法获取拓展板数据", "1、检查拓展板是否正确上电", "", ""],
+        ["1701", "\"拓展板通讯异常\"", "系统无法获取拓展板数据", "2、检查拓展板通讯线束是否正常", "", ""],
+        ["1701", "\"拓展板通讯异常\"", "系统无法获取拓展板数据", "3、检查拓展板通讯参数设置是否正确", "", ""],
+        ["1801", "\"安全PLC通讯异常\"", "系统无法获取安全PLC数据", "1、检查安全PLC是否正确上电", "", ""],
+        ["1801", "\"安全PLC通讯异常\"", "系统无法获取安全PLC数据", "2、检查安全PLC通讯线束是否正常", "", ""],
+        ["1801", "\"安全PLC通讯异常\"", "系统无法获取安全PLC数据", "3、检查安全PLC通讯参数设置是否正确", "", ""],
+        ["2201", "\"**伺服驱动器故障，故障码:\"", "驱动主动上报故障状态", "1、根据驱动器上报故障码对驱动器进行排查", "", ""],
+        ["2301", "\"低电量报警(io)\"", "电池电量过低", "1、请及时给电池充电", "", ""],
+        ["2401", "\"下位机初始化异常\"", "系统初始化与下位机的通讯接口失败", "1、检查PC型号及系统是否正确", "", ""],
+        ["2401", "\"下位机初始化异常\"", "系统初始化与下位机的通讯接口失败", "2、检查通讯接口是否受损", "", ""],
+        ["2501", "\"二维码读头过热\"", "读码器主动上报故障状态", "1、故障场景气温是否过高", "", ""],
+        ["2501", "\"二维码读头过热\"", "读码器主动上报故障状态", "2、车体内是否有异物", "", ""],
+        ["2502", "\"发现非PGV规格二维码\"", "读码器主动上报故障状态", "1、检查二维码是否受损", "", ""],
+        ["2502", "\"发现非PGV规格二维码\"", "读码器主动上报故障状态", "2、读头表面是否粘有异物", "", ""],
+        ["2503", "\"读头离码带太近\"", "读码器主动上报故障状态", "1、检查码带、二维码规格是否正确", "", ""],
+        ["2503", "\"读头离码带太近\"", "读码器主动上报故障状态", "2、检查读头安装是否松动", "", ""],
+        ["2504", "\"读头离码带太远\"", "读码器主动上报故障状态", "1、检查码带、二维码规格是否正确", "", ""],
+        ["2504", "\"读头离码带太远\"", "读码器主动上报故障状态", "2、检查读头安装是否松动", "", ""],
+        ["2505", "\"码的对比度太低\"", "读码器主动上报故障状态", "1、检查码带、二维码规格是否正确", "", ""],
+        ["2505", "\"码的对比度太低\"", "读码器主动上报故障状态", "2、检查读头安装是否松动", "", ""],
+        ["2506", "\"读头相对于码带旋转或偏转过大\"", "读码器主动上报故障状态", "1、检查码带、二维码规格是否正确", "", ""],
+        ["2506", "\"读头相对于码带旋转或偏转过大\"", "读码器主动上报故障状态", "2、检查读头安装是否松动", "", ""],
+        ["2507", "\"检测到修复码\"", "读码器主动上报故障状态", "1、检查码带、二维码规格是否正确", "", ""],
+        ["2507", "\"检测到修复码\"", "读码器主动上报故障状态", "2、检查读头安装是否松动", "", ""],
+        ["2508", "\"位置码带靠近在分叉或交叉处\"", "读码器主动上报故障状态", "1、检查码带、二维码规格是否正确", "", ""],
+        ["2508", "\"位置码带靠近在分叉或交叉处\"", "读码器主动上报故障状态", "2、检查读头安装是否松动", "", ""],
+        ["2509", "\"发现超过规定的码带\"", "读码器主动上报故障状态", "1、检查码带、二维码规格是否正确", "", ""],
+        ["2509", "\"发现超过规定的码带\"", "读码器主动上报故障状态", "2、检查读头安装是否松动", "", ""],
+        ["2601", "\"超上限位检测\"", "举升平台超过最高限位", "1、检查举升速度设置是否过大", "", ""],
+        ["2601", "\"超上限位检测\"", "举升平台超过最高限位", "2、检查上限位传感器是否有效", "", ""],
+        ["2602", "\"超下限位检测\"", "举升平台低于最低限位", "1、检查举升速度设置是否过大", "", ""],
+        ["2602", "\"超下限位检测\"", "举升平台低于最低限位", "2、检查下限位传感器是否有效", "", ""],
+        ["2602", "\"超下限位检测\"", "举升平台低于最低限位", "3、检查托举货物是否超重", "", ""],
+        ["2701", "\"急停按钮触发\"", "车体急停按钮被按下", "", "", ""],
+        ["2702", "\"碰撞触发\"", "防撞条受到挤压", "1、检查AGV是否碰撞到物体", "临时办法：关闭碰撞检查手动操作移车", ""],
+        ["2702", "\"碰撞触发\"", "防撞条受到挤压", "2、检查防撞条内部线束是否有破损短路", "临时办法：关闭碰撞检查手动操作移车", ""],
+        ["2704", "\"手柄急停触发\"", "外设手柄急停按钮被按下", "", "", ""],
+        ["3101", "\"串口初始化异常\"", "二维码读头串口初始化异常", "1、检查PC型号及系统是否正确", "", ""],
+        ["3101", "\"串口初始化异常\"", "二维码读头串口初始化异常", "2、检查通讯接口是否受损", "", ""],
+        ["3101", "\"串口初始化异常\"", "二维码读头串口初始化异常", "3、检查串口配置是否正确", "", ""],
+        ["3102", "\"主循环计算时间异常\"", "系统检测到线程周期超过预警值", "1、检查VNC连接数量", "", ""],
+        ["3102", "\"主循环计算时间异常\"", "系统检测到线程周期超过预警值", "2、", "", ""],
+        ["3104", "\"路线地图读取错误\"", "路径地图解析失败", "1、检查路径文件是否损坏", "", ""],
+        ["4101", "\"二维码位置丢失\"", "在二维码路线上置信度为0", "1、检查该路线上二维码是否已录入地图", "", ""],
+        ["4101", "\"二维码位置丢失\"", "在二维码路线上置信度为0", "2、检查该位置二维码是否污损", "", ""],
+        ["4101", "\"二维码位置丢失\"", "在二维码路线上置信度为0", "3、若在二维码路径过程中报错需检查二维码间隔距离是否过小或AGV在该路径行驶速度过低", "", ""],
+        ["4101", "\"二维码位置丢失\"", "在二维码路线上置信度为0", "4、若在进入二维码路径时报错检查AGV是否在进入二维码路径前读取到二维码", "", ""],
+        ["4101", "\"二维码位置丢失\"", "在二维码路线上置信度为0", "5、若在进入二维码路径时报错检查当前自然导航环境是否变动过大、特征过程或路面坑洼严重", "", ""],
+        ["4103", "\"激光定位异常\"", "系统获取不到激光定位数据", "1、检查", "", ""],
+        ["4104", "\"激光定位置信度过低\"", "在自然导航路线上置信度低于设定值", "1、检查当前自然导航环境是否变动过大、特征太差或路面坑洼严重", "", ""],
+        ["4104", "\"激光定位置信度过低\"", "在自然导航路线上置信度低于设定值", "2、若已布置反光板，需要检查反光板是否被移动或反光膜是否受损", "", ""],
+        ["4106", "\"不在路径上，航向误差过大，误差值:\"", "AGV脱轨", "1、检查当前自然导航环境是否变动过大、特征太差或路面坑洼严重", "", ""],
+        ["4106", "\"不在路径上，航向误差过大，误差值:\"", "AGV脱轨", "2、若已布置反光板，需要检查反光板是否被移动或反光膜是否受损", "", ""],
+        ["4106", "\"不在路径上，航向误差过大，误差值:\"", "AGV脱轨", "3、检查自然导航地图噪点是否过多、模糊、拼接不准确", "", ""],
+        ["4106", "\"不在路径上，航向误差过大，误差值:\"", "AGV脱轨", "4、平移路线平移角度超出舵角最大角度", "", ""],
+        ["4106", "\"不在路径上，航向误差过大，误差值:\"", "AGV脱轨", "5、检查舵轮是否受损", "", ""],
+        ["4107", "\"不在路径上，位置误差过大，误差值:\"", "AGV脱轨", "1、检查当前自然导航环境是否变动过大、特征太差或路面坑洼严重", "", ""],
+        ["4107", "\"不在路径上，位置误差过大，误差值:\"", "AGV脱轨", "2、若已布置反光板，需要检查反光板是否被移动或反光膜是否受损", "", ""],
+        ["4107", "\"不在路径上，位置误差过大，误差值:\"", "AGV脱轨", "3、检查自然导航地图噪点是否过多、模糊、拼接不准确", "", ""],
+        ["4107", "\"不在路径上，位置误差过大，误差值:\"", "AGV脱轨", "4、平移路线平移角度超出舵角最大角度", "", ""],
+        ["4107", "\"不在路径上，位置误差过大，误差值:\"", "AGV脱轨", "5、检查舵轮是否受损", "", ""],
+        ["4108", "\"平移角度跟踪异常\"", "AGV脱轨", "1、检查当前自然导航环境是否变动过大、特征太差或路面坑洼严重", "", ""],
+        ["4108", "\"平移角度跟踪异常\"", "AGV脱轨", "2、若已布置反光板，需要检查反光板是否被移动或反光膜是否受损", "", ""],
+        ["4108", "\"平移角度跟踪异常\"", "AGV脱轨", "3、检查自然导航地图噪点是否过多、模糊、拼接不准确", "", ""],
+        ["4108", "\"平移角度跟踪异常\"", "AGV脱轨", "4、平移路线平移角度超出舵角最大角度", "", ""],
+        ["4108", "\"平移角度跟踪异常\"", "AGV脱轨", "5、检查舵轮是否受损", "", ""],
+        ["4109", "\"曲线跟踪异常\"", "AGV脱轨", "1、检查当前自然导航环境是否变动过大、特征太差或路面坑洼严重", "", ""],
+        ["4109", "\"曲线跟踪异常\"", "AGV脱轨", "2、若已布置反光板，需要检查反光板是否被移动或反光膜是否受损", "", ""],
+        ["4109", "\"曲线跟踪异常\"", "AGV脱轨", "3、检查自然导航地图噪点是否过多、模糊、拼接不准确", "", ""],
+        ["4109", "\"曲线跟踪异常\"", "AGV脱轨", "4、平移路线平移角度超出舵角最大角度", "", ""],
+        ["4109", "\"曲线跟踪异常\"", "AGV脱轨", "5、检查舵轮是否受损", "", ""],
+        ["4110", "\"AGV不在自转点上\"", "AGV脱轨", "1、检查当前自然导航环境是否变动过大、特征太差或路面坑洼严重", "", ""],
+        ["4110", "\"AGV不在自转点上\"", "AGV脱轨", "2、若已布置反光板，需要检查反光板是否被移动或反光膜是否受损", "", ""],
+        ["4110", "\"AGV不在自转点上\"", "AGV脱轨", "3、检查自然导航地图噪点是否过多、模糊、拼接不准确", "", ""],
+        ["4110", "\"AGV不在自转点上\"", "AGV脱轨", "4、平移路线平移角度超出舵角最大角度", "", ""],
+        ["4110", "\"AGV不在自转点上\"", "AGV脱轨", "5、检查舵轮是否受损", "", ""],
+        ["4111", "\"不在路径上，AGV在路径点前\"", "AGV启动位置与路径点位距离过大", "1、检查AGV是否被人为挪动", "", ""],
+        ["4111", "\"不在路径上，AGV在路径点前\"", "AGV启动位置与路径点位距离过大", "2、检查下发任务是否正确", "", ""],
+        ["4112", "\"不在路径上，AGV在路径点后\"", "AGV启动位置与路径点位距离过大", "1、检查AGV是否被人为挪动", "", ""],
+        ["4112", "\"不在路径上，AGV在路径点后\"", "AGV启动位置与路径点位距离过大", "2、检查下发任务是否正确", "", ""],
+        ["4114", "\"路径数据异常\"", "路径终点修正值过大", "1、检查修正值X（设置范围±0.05米）、Y（设置范围±0.05米）、V（设置范围±0.087弧度）是否在范围内", "", ""],
+        ["4201", "\"速度跟随异常:\"", "控制速度与反馈速度相差过大", "1、检查该位置路面是否坑洼严重", "", ""],
+        ["4201", "\"速度跟随异常:\"", "控制速度与反馈速度相差过大", "2、检查是否超载", "", ""],
+        ["4201", "\"速度跟随异常:\"", "控制速度与反馈速度相差过大", "3、检查舵机是否受损", "", ""],
+        ["4202", "\"角度跟随异常:\"", "控制舵角与反馈舵角相差过大", "1、检查该位置路面是否坑洼严重", "", ""],
+        ["4202", "\"角度跟随异常:\"", "控制舵角与反馈舵角相差过大", "2、检查是否有障碍物阻挡舵轮转向", "", ""],
+        ["4202", "\"角度跟随异常:\"", "控制舵角与反馈舵角相差过大", "3、检查舵机是否受损", "", ""],
+        ["4205", "\"检测到轮子打滑\"", "IMU检查到AGV打滑", "1、检查该位置路面是否坑洼严重、湿滑", "", ""],
+        ["4205", "\"检测到轮子打滑\"", "IMU检查到AGV打滑", "2、检查是否超载", "", ""],
+        ["4303", "\"举升位置误差过大\"", "举升位置与任务点位距离过大", "1、若是自然导航对接则检查环境特征（定位跳动幅度大）", "", ""],
+        ["4303", "\"举升位置误差过大\"", "举升位置与任务点位距离过大", "2、若是二维码导航对接则检查点位是否勾选保持二维码定位、录码精度太差", "", ""],
+        ["4304", "\"举升动作超时\"", "举升任务执行时间过长", "1、若有线边对接则检查两边信号对接流程是否中止", "", ""],
+        ["4304", "\"举升动作超时\"", "举升任务执行时间过长", "2、举升机构受损导致无法升降", "", ""],
+        ["4304", "\"举升动作超时\"", "举升任务执行时间过长", "3、检查检测举升高度传感器的是否受损", "", ""],
+        ["4305", "\"货物检测异常\"", "AGV带货状态和任务不一致", "1、检查对接精度（货物没有到位）", "", ""],
+        ["4305", "\"货物检测异常\"", "AGV带货状态和任务不一致", "2、检查货物检测传感器是否受损", "", ""],
+        ["4307", "已有负载货物无法执行其他取货任务", "已有负载货物无法执行其他取货任务", "1、检查任务内容", "", ""],
+        ["4308", "放货位置有障碍物", "放货位置有障碍物", "1、检查放货位置的障碍物", "", ""],
+        ["4308", "放货位置有障碍物", "放货位置有障碍物", "2、检查检测的传感器检测范围、是否受损", "", ""],
+        ["4309", "取货位置无货物", "执行取货任务取货位置无货物", "1、检查任务内容", "", ""],
+        ["4310", "动作点停止角度误差过大", "点位任务位置与任务点位距离过大", "1、若是自然导航对接则检查环境特征（定位跳动幅度大）", "", ""],
+        ["4310", "动作点停止角度误差过大", "点位任务位置与任务点位距离过大", "2、若是二维码导航对接则检查点位是否勾选保持二维码定位、录码精度太差", "", ""],
+        ["4311", "AGV动作点位置超差", "点位任务位置与任务点位距离过大", "1、若是自然导航对接则检查环境特征（定位跳动幅度大）", "", ""],
+        ["4311", "AGV动作点位置超差", "点位任务位置与任务点位距离过大", "2、若是二维码导航对接则检查点位是否勾选保持二维码定位、录码精度太差", "", ""],
+        ["4312", "滚筒动作点不在二维码上", "任务点上未读取到二维码", "1、若任务点采用自然导航定位则检查是否勾选保持二维码定位", "", ""],
+        ["4312", "滚筒动作点不在二维码上", "任务点上未读取到二维码", "2、若是保持二维码定位则检查点位上的二维码是否污损", "", ""],
+        ["4313", "滚筒任务内容错误", "滚筒任务执行出现错误", "1、检查挡板外侧是否有物体（挡板外侧光电传感器被触发）", "", ""],
+        ["4313", "滚筒任务内容错误", "滚筒任务执行出现错误", "2、检查任务内容（指定滚筒不存在或未指定滚筒）", "", ""],
+        ["4314", "滚筒任务超时", "滚筒任务执行时间过长", "1、若有线边对接则检查两边信号对接流程是否中止", "", ""],
+        ["4314", "滚筒任务超时", "滚筒任务执行时间过长", "2、滚筒机构受损导致无法运输", "", ""],
+        ["4314", "滚筒任务超时", "滚筒任务执行时间过长", "3、检查货物检测传感器的是否受损", "", ""],
+        ["4401", "\"**驱动器使能超时\"", "系统无法使能驱动器使能", "1、检查驱动器控制模式", "", ""],
+        ["4401", "\"**驱动器使能超时\"", "系统无法使能驱动器使能", "2、检查是否有相同节点号的设备", "", ""],
+        ["4403", "\"低电量报警(SOC)\"", "BMS上报电量低于20%", "1、请及时给电池充电", "", ""],
+        ["4403", "\"低电量报警(SOC)\"", "BMS上报电量低于20%", "2、BMS电量计算错误（联系供应商处理）", "", ""],
+        ["4404", "\"避障传感器被屏蔽，无法启动自动运行模式\"", "避障传感器被屏蔽，不允许自动运行", "1、检查避障传感器开关是否打开（软件设置）", "", ""],
+        ["4407", "\"硬件安全装置处于屏蔽状态，不允许进入自动状态\"", "安全装置被屏蔽，不允许自动运行", "1、检查屏蔽安全继电器开关是否打开", "", ""],
+        ["4408", "线体通讯异常", "未接收到线体信号应答", "1、检查AGV和线体传感器是否正常工作", "", ""],
+        ["4408", "线体通讯异常", "未接收到线体信号应答", "2、检查线体是否对传感器进行控制", "", ""],
+        ["4411", "远程IO通讯超时异常", "系统无法获取远程IO数据", "1、检查远程IO和接收器是否正常上电工作，线路是否受损", "", ""],
+        ["4411", "远程IO通讯超时异常", "系统无法获取远程IO数据", "2、检查信号强度", "", ""],
+        ["4412", "远程IO状态反馈异常", "等待远程IO动作时间过长", "1、检查远程IO是否正常工作，线路是否受损", "", ""],
+        ["4412", "远程IO状态反馈异常", "等待远程IO动作时间过长", "2、检查信号强度", "", ""]
+    ];
 }
 
-// ========== 实时保存（每次修改自动保存）==========
-function saveToLocalStorage() {
-    try {
-        const contentSections = document.querySelectorAll('.content-section');
-        const data = {};
-        contentSections.forEach((section, idx) => {
-            data['section_' + idx] = section.innerHTML;
-        });
-        localStorage.setItem('forklift_config_data', JSON.stringify(data));
-    } catch (e) {
-        console.warn('localStorage 保存失败:', e);
-    }
+// 从表格数据构建按钮树
+// ★ 新逻辑：同一故障代码的多行自动合并
+// 列: 0=故障代码 1=故障提示 2=故障原因 3=检查项 4=处理方法 5=备注
+// 层级：
+//   一级按钮：故障代码（标题=故障代码，副标题=故障提示）
+//     文本：故障提示 + 故障原因
+//   二级按钮：检查项（每一行一个检查项作为一个子按钮）
+//     文本：检查项内容（单条）
+//   三级按钮：处理方法（若有）
+//   四级按钮：备注（若有）
+function buildTreeFromTable(tableData) {
+    const tree = {
+        id: 'root',
+        title: '常见故障',
+        sub: '按故障代码分类查看',
+        children: [],
+        contentText: '常见故障总览\n\n请从下方分类中选择，查看对应的故障详情。'
+    };
+
+    const codeMap = new Map();
+    let idCounter = 0;
+
+    tableData.forEach((row) => {
+        const [code, tip, reason, checkItem, handle, note] = row.map(v => (v === undefined || v === null) ? '' : String(v));
+
+        if (!code.trim() && !tip.trim() && !reason.trim() && !checkItem.trim() && !handle.trim() && !note.trim()) return;
+
+        const codeKey = code.trim() || '（未分类）';
+        let node1 = codeMap.get(codeKey);
+        if (!node1) {
+            node1 = {
+                id: 'C-' + (idCounter++),
+                title: codeKey,
+                sub: tip.trim() || '点击查看详情',
+                children: [],
+                contentText: ''
+            };
+            codeMap.set(codeKey, node1);
+            tree.children.push(node1);
+        }
+
+        // 更新一级节点的文本
+        let level1Text = [];
+        if (tip.trim()) level1Text.push('【故障提示】\n' + tip.trim());
+        if (reason.trim()) level1Text.push('【故障原因】\n' + reason.trim());
+        node1.contentText = level1Text.join('\n\n') || '（暂无说明）';
+
+        // 更新副标题
+        if (!node1.sub || node1.sub === '点击查看详情') {
+            node1.sub = tip.trim() || '点击查看详情';
+        }
+
+        // 无检查项，跳过
+        if (!checkItem.trim()) return;
+
+        // ===== 二级按钮：检查项（每一行一个独立按钮） =====
+        // 用 checkItem 作为按钮标题，保持行与行之间独立
+        let node2 = {
+            id: 'D-' + (idCounter++),
+            title: checkItem.trim(),
+            sub: handle.trim() ? '点击查看处理方法' : (note.trim() ? '点击查看备注' : ''),
+            children: [],
+            contentText: checkItem.trim()
+        };
+        node1.children.push(node2);
+
+        // ===== 三级按钮：处理方法 =====
+        if (handle.trim()) {
+            let node3 = {
+                id: 'H-' + (idCounter++),
+                title: '处理方法',
+                sub: handle.trim().substring(0, 50) + (handle.trim().length > 50 ? '…' : ''),
+                children: [],
+                contentText: handle.trim()
+            };
+            node2.children.push(node3);
+
+            // ===== 四级按钮：备注 =====
+            if (note.trim()) {
+                let node4 = {
+                    id: 'N-' + (idCounter++),
+                    title: '备注',
+                    sub: note.trim().substring(0, 50) + (note.trim().length > 50 ? '…' : ''),
+                    children: [],
+                    contentText: note.trim()
+                };
+                node3.children.push(node4);
+            }
+        } else if (note.trim()) {
+            // 只有备注，挂到检查项下
+            let node3 = {
+                id: 'N-' + (idCounter++),
+                title: '备注',
+                sub: note.trim().substring(0, 50) + (note.trim().length > 50 ? '…' : ''),
+                children: [],
+                contentText: note.trim()
+            };
+            node2.children.push(node3);
+        }
+    });
+
+    return tree;
 }
 
-// 监听所有可编辑元素的输入事件，实时保存
-document.addEventListener('input', function(e) {
-    if (editMode || e.target.getAttribute('contenteditable') === 'true') {
-        // 防抖保存
-        clearTimeout(window._saveTimer);
-        window._saveTimer = setTimeout(saveToLocalStorage, 500);
-    }
-});
-
-// ========== 下载更新后的HTML ==========
-function downloadHTML() {
-    // 先退出编辑模式，移除 contenteditable 属性
-    const editableElements = document.querySelectorAll('[contenteditable="true"]');
-    editableElements.forEach(el => el.removeAttribute('contenteditable'));
-    document.getElementById('editBanner').classList.remove('active');
-    document.getElementById('btnEdit').textContent = '✏️ 开始编辑';
-    document.getElementById('btnEdit').style.background = '';
-    editMode = false;
-
-    // 获取当前完整HTML
-    const htmlContent = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-
-    // 创建下载链接
-    const blob = new Blob([htmlContent], { type: 'text/html; charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = '叉车基础配置文档_可编辑版.html';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    showToast('文档已下载，可直接分享给他人');
-}
-
-// ========== 复制分享链接 ==========
-function copyShareLink() {
-    // 将当前页面内容转为 data URL 供分享
-    const htmlContent = document.documentElement.outerHTML;
-    const dataUrl = 'data:text/html;charset=utf-8,' + encodeURIComponent(htmlContent);
-
-    // 尝试复制到剪贴板
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        // data URL 太长，改用文本说明
-        navigator.clipboard.writeText('请将此HTML文件直接发送给他人，对方用浏览器打开即可使用可编辑版本。').then(() => {
-            showToast('已复制分享说明，请将HTML文件直接发送给他人的微信/邮件');
-        }).catch(() => {
-            fallbackCopy('请将此HTML文件直接发送给他人，对方用浏览器打开即可使用可编辑版本。');
-        });
-    } else {
-        fallbackCopy('请将此HTML文件直接发送给他人，对方用浏览器打开即可使用可编辑版本。');
-    }
-}
-
-function fallbackCopy(text) {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select();
-    try {
-        document.execCommand('copy');
-        showToast('已复制分享说明');
-    } catch (e) {
-        showToast('请手动复制此HTML文件发送给他人');
-    }
-    document.body.removeChild(ta);
-}
-
-// ========== 恢复默认 ==========
-function resetAll() {
-    if (confirm('确定要恢复为默认内容吗？所有自定义修改将被清除。')) {
-        localStorage.removeItem('forklift_config_data');
-        location.reload();
-    }
-}
-
-// ========== 加载已保存的内容 ==========
-function loadFromLocalStorage() {
-    try {
-        const saved = localStorage.getItem('forklift_config_data');
-        if (saved) {
-            const data = JSON.parse(saved);
-            const contentSections = document.querySelectorAll('.content-section');
-            let loaded = false;
-            contentSections.forEach((section, idx) => {
-                const key = 'section_' + idx;
-                if (data[key]) {
-                    section.innerHTML = data[key];
-                    loaded = true;
+function createDefaultFiles() {
+    const defaultTable = createDefaultFaultTable();
+    return [
+        {
+            fileName: "避障通道说明.xls",
+            sections: [
+                {
+                    title: "2D避障",
+                    columns: ["功能", "车载显示避障区域", "SICK安全型雷达", "兴颂避障雷达", "备注"],
+                    rows: [
+                        ["空载低速前进", "0", "1", "63", "小于安全速度+0.05m/s"],
+                        ["负载低速前进", "1", "2", "62", "小于安全速度+0.05m/s"],
+                        ["空载高速前进", "2", "3", "61", "大于安全速度+0.05m/s"],
+                        ["负载高速前进", "3", "4", "60", "大于安全速度+0.05m/s"],
+                        ["手动模式", "4", "5", "59", ""],
+                        ["原地旋转", "5", "6", "58", ""],
+                        ["空载平移", "6", "7", "57", ""],
+                        ["负载平移", "7", "8", "56", ""],
+                        ["空载低速后退", "8", "9", "55", "大于安全速度+0.05m/s"],
+                        ["负载低速后退", "9", "10", "54", "大于安全速度+0.05m/s"],
+                        ["空载高速后退", "10", "11", "53", "小于安全速度+0.05m/s"],
+                        ["负载高速后退", "11", "12", "52", "小于安全速度+0.05m/s"],
+                        ["自定义区域", "12", "13", "51", ""],
+                        ["自定义区域", "13", "14", "50", ""],
+                        ["自定义区域", "14", "15", "49", ""],
+                        ["自定义区域", "15", "16", "48", ""]
+                    ],
+                    note: "注：<br>1、雷达ID定义：ID0-前导航雷达；ID1-后导航雷达；（非标项目增加，需询问后续雷达ID对应关系）；<br>2、可在雷达上设置避障区域范围时，不需要在车载调试软件上设置；<br>3、车身所有避障雷达（后雷达除外）共用同一个避障通道；<br>4、部分安全雷达区域数量不足时；<br>5、特殊区域可以一下几种方法强制切换，第一种是在路径上勾选bit10并在用户存储信息2-写入避障通道（自动生效）、第二种是在调试软件进入路径编辑“uint32_0”-写入避障通道（自动生效）、第三种是在车载参数设置强制切换区域（自动以外模式生效）。生效优先级第一种高于第二种。"
+                },
+                {
+                    title: "3D避障",
+                    columns: ["功能", "车载显示避障区域"],
+                    rows: [
+                        ["空载低速前进", "0"],
+                        ["负载低速前进", "1"],
+                        ["空载高速前进", "2"],
+                        ["负载高速前进", "3"],
+                        ["手动模式", "4"],
+                        ["原地旋转", "5"],
+                        ["空载平移", "6"],
+                        ["负载平移", "7"],
+                        ["空载低速后退", "8"],
+                        ["负载低速后退", "9"],
+                        ["空载高速后退", "10"],
+                        ["负载高速后退", "11"],
+                        ["自定义区域", "12"],
+                        ["自定义区域", "13"],
+                        ["自定义区域", "14"],
+                        ["自定义区域", "15"]
+                    ],
+                    note: null
                 }
-            });
-            if (loaded) {
-                showToast('已恢复上次编辑的内容');
+            ]
+        },
+        {
+            fileName: "相机识别参数.xls",
+            sections: [
+                {
+                    title: null,
+                    columns: null,
+                    rows: [
+                        ["", "", "", "", "", "", "", "注：栈板插孔的高度和宽度需根据实际现场的栈板尺寸做调整。"],
+                        ["", "", "", "", "", "", "", "调整相机安装位置前先调整角度（V）再调整左右（Y）"],
+                        ["", "", "", "", "", "", "", "1、相机安装角度（弧度）：如果识别取货时栈板有角度偏差，可通过调整此参数"],
+                        ["", "", "", "", "", "", "", "3：相机安装位置Y轴；如果识别取货左右有偏差，可通过调整此参数。"],
+                        ["", "", "", "", "", "", "", "4：栈板插孔高度"],
+                        ["", "", "", "", "", "", "", "5：栈板插孔宽度"],
+                        ["", "", "", "", "", "", "", "6：栈板内宽"],
+                        ["", "", "", "", "", "", "", "7：开启相机识别功能"],
+                        ["", "", "", "", "", "", "", "8：填cam_pose_fix_x（当取货时，栈板端面无法接触到叉尖货物检测开关/撞击栈板时，调整此参数）"],
+                        ["", "", "", "", "", "", "", ""],
+                        ["", "", "", "", "", "", "", "识别距离约束：<br>叉尖到栈板端面：最短50-70cm，最远1.8m，栈板偏差角度越大，识别距离越长"],
+                        ["", "", "", "", "", "", "", ""],
+                        ["", "", "", "", "", "", "", "路线要求：禁止原地旋转后直接进入识别路线，原地旋转完后需走一段直线再进入识别路线"],
+                        ["", "", "", "", "", "", "", ""],
+                        ["", "", "", "", "", "", "", ""],
+                        ["", "", "", "", "", "", "", ""],
+                        ["", "", "", "", "", "", "", ""],
+                        ["", "", "", "", "", "", "", ""],
+                        ["", "", "", "", "", "", "", ""],
+                        ["", "", "", "", "", "", "", ""],
+                        ["", "", "", "", "", "", "", ""],
+                        ["", "", "", "", "", "", "", ""],
+                        ["", "路径：top_cam_ground_coeff.ini", "", "", "", "", "", ""],
+                        ["", "相机标定后检查标定数据，如偏差大则重新标定", "", "", "", "", "", ""]
+                    ],
+                    note: null
+                }
+            ]
+        },
+        {
+            fileName: "路径标记位配置.xls",
+            sections: [
+                {
+                    title: null,
+                    columns: ["标志位", "说明"],
+                    rows: [
+                        ["Bit0", "平移路径，在路径信息“用户储存信息”中填入平移角度（车身姿态在全局坐标系的角度，单位0.01度）"],
+                        ["Bit1", "二维码定位"],
+                        ["Bit2", "反光柱定位；使用反光柱定位需扫描到≥3个柱子才有效"],
+                        ["Bit3", "模糊定位；精度不稳定仅在施工初期现场较为混乱的环境下使用"],
+                        ["Bit4", ""],
+                        ["Bit5", ""],
+                        ["Bit6", ""],
+                        ["Bit7", ""],
+                        ["Bit8", ""],
+                        ["Bit9", "屏蔽叉尖检测传感器(路径段勾选)"],
+                        ["Bit10", "选用特定避障--在路径信息“用户储存信息2”中填对应的避障通道（路径段/站点选用）"],
+                        ["Bit11", "盲取功能，只要在路径上触发了货物检测弹片就认为取到货（取货路径段和站点勾选）"],
+                        ["Bit12", "开启相机识别功能，反之禁用相机识别功能（取放货路径段和取放货站点勾选）"],
+                        ["Bit13", "允许叉臂提前升/降到指定高度（路径勾选）"],
+                        ["Bit14", "取放货路段，叉臂禁止升降动作（路径勾选）"],
+                        ["Bit15", "取放货路段，叉臂禁止升降动作（路径勾选）"]
+                    ],
+                    note: "如右图通过“标志位”可以设置路径或点位属性"
+                }
+            ]
+        },
+        {
+            fileName: "车载参数配置.ini",
+            sections: [
+                {
+                    title: null,
+                    columns: ["参数名", "说明"],
+                    rows: [
+                        ["/config/agv_properties.ini", ""],
+                        ["[agv_location]", ""],
+                        ["is_dm_decoder_enable", "是否使用二维码读码器"],
+                        ["is_dm_location_enable", "是否使用二维码定位功能"],
+                        ["is_dm_map_err_auto_fix_enable", "是否使用二维码自学习功能"],
+                        ["is_reflector_loc_enable", "是否使用反光板功能"],
+                        ["orbit_err_max", "允许横向误差"],
+                        ["control_board_tcp_ip", "下位机IP"],
+                        ["control_board_tcp_port", "下位机端口号"],
+                        ["is_impact_sensor_enable", "是否使用防撞条功能"],
+                        ["is_mcu_tcp_connect", "是否使用TCP链接下位机"],
+                        ["is_obstacle_detect_enable", "是否使用避障传感器"],
+                        ["is_pointcloud_obstacle_detect_enable", "是否使用点云数据避障"],
+                        ["is_real_robot", "历史遗留不可用"],
+                        ["is_roller_enable", "是否使用滚筒功能"],
+                        ["is_enable_forklift_lift_control", "是否使用举升功能"],
+                        ["safty_start_time", "安全限速解除时间"],
+                        ["version", "文本"],
+                        ["[coefficient]", ""],
+                        ["coefficient_linear_break", "提前停车角度系数"],
+                        ["coefficient_rotation_break", "提前停车线速度系数"],
+                        ["[confidence]", ""],
+                        ["laser_confidence_slow_threshold", "触发限速置信值"],
+                        ["laser_confidence_stop_threshold", "触发停车置信值"],
+                        ["[config_file_settings]", ""],
+                        ["is_set_file", "是否重置初始化参数文件"],
+                        ["[dis]", ""],
+                        ["dis_slow_before_station", "站点前提前减速距离"],
+                        ["dis_slow_before_turn", "转弯前提前减速距离"],
+                        ["[dispatcher]", ""],
+                        ["dispatcher_comm_port", "调度IP"],
+                        ["dispatcher_ip_addr", "调度端口"],
+                        ["fix_AGVID", "AGV-ID"],
+                        ["hb_connect_model", "AGV控制模式"],
+                        ["[dm_decoder]", ""],
+                        ["main_offset_v", "导航读头偏置角度"],
+                        ["main_offset_x", "导航读头偏置X距离"],
+                        ["main_offset_y", "导航读头偏置Y距离"],
+                        ["rack_offset_v", "上读头偏置角度"],
+                        ["rack_offset_x", "上读头偏置X距离"],
+                        ["rack_offset_y", "上读头偏置Y距离"],
+                        ["[frame_id]", ""],
+                        ["laser_frame_front", "前雷达句柄"],
+                        ["laser_frame_rear", "后雷达句柄"],
+                        ["[imu_module]", ""],
+                        ["is_imu_enable", "是否使用陀螺仪"],
+                        ["[lidar]", ""],
+                        ["is_lidar_0_enable", "是否使用前雷达"],
+                        ["is_lidar_1_enable", "是否使用后雷达"],
+                        ["lidar_installation_pose_fix_0_v", "前雷达朝向角度"],
+                        ["lidar_installation_pose_fix_0_x", "前雷达X坐标"],
+                        ["lidar_installation_pose_fix_0_y", "前雷达Y坐标"],
+                        ["lidar_installation_pose_fix_1_v", "后雷达朝向角度"],
+                        ["lidar_installation_pose_fix_1_x", "后雷达X坐标"],
+                        ["lidar_installation_pose_fix_1_y", "后雷达Y坐标"],
+                        ["[loc_ekf]", ""],
+                        ["ekf_factor_angular", "角度滤波系数"],
+                        ["ekf_factor_linear", "坐标位置滤波系数"],
+                        ["ekf_odom_base_noise_0", "坐标位置滤波值"],
+                        ["ekf_odom_base_noise_1", "角度滤波值"],
+                        ["is_loc_ekf_filter_enable", "定位滤波器"],
+                        ["[map]", ""],
+                        ["layer_0_dm_map", "二维码地图路径"],
+                        ["layer_0_path_map", "路线地图路径"],
+                        ["layer_0_ref_map", "反光板地图路径"],
+                        ["layer_0_slam_map", "轮廓地图路径"],
+                        ["layer_count", "楼层数量"],
+                        ["[pallet_docking]", ""],
+                        ["is_enable_tof_cam", "是否使用栈板识别功能"],
+                        ["pallet_length_fix", "停止点到栈板端面距离"],
+                        ["pallet_scan_cam_topic", "识别数据来源"],
+                        ["[reserved_parameter]", ""],
+                        ["reserved_parameter_1", "特殊参数1"],
+                        ["reserved_parameter_2", "特殊参数2"],
+                        ["reserved_parameter_3", "特殊参数3"],
+                        ["reserved_parameter_4", "特殊参数4"],
+                        ["[rudder_zero_angle]", ""],
+                        ["angle_0", "前舵轮标定偏移舵角"],
+                        ["angle_1", "后舵轮标定偏移舵角"],
+                        ["mechanical_angle_0", "前舵轮机械偏移角度"],
+                        ["mechanical_angle_1", "后舵轮机械偏移角度"],
+                        ["rudder_angle_fix_ssi_0", "前舵轮零位绝对值编码"],
+                        ["rudder_angle_fix_ssi_1", "后舵轮零位绝对值编码"],
+                        ["[serial_port]", ""],
+                        ["port_0", "串行端口0的设备文件路径"],
+                        ["port_0_baud", "串行端口0的波特率"],
+                        ["port_1", "串行端口1的设备文件路径"],
+                        ["port_1_baud", "串行端口1的波特率"],
+                        ["port_2", "串行端口2的设备文件路径"],
+                        ["port_2_baud", "串行端口2的波特率"],
+                        ["port_3", "串行端口3的设备文件路径"],
+                        ["port_3_baud", "串行端口3的波特率"],
+                        ["[spd]", ""],
+                        ["auto_ctrl_angular_spd_max", "自动不带载最大角速度"],
+                        ["auto_ctrl_angular_spd_max_loaded", "自动带载最大角速度"],
+                        ["auto_ctrl_linear_spd_max", "自动不带载最大线速度"],
+                        ["auto_ctrl_linear_spd_max_loaded", "自动带载最大线速度"],
+                        ["auto_ctrl_linear_spd_max_loaded_trans", "自动带载最大平移速度"],
+                        ["auto_ctrl_linear_spd_max_trans", "自动不带载最大平移速度"],
+                        ["auto_ctrl_min_docking_spd", "停车前最小速度"],
+                        ["auto_docking_spd", "自动对接限速"],
+                        ["auto_safty_spd", "安全线速度"],
+                        ["manual_ctrl_angular_spd_max", "手动角速度"],
+                        ["manual_ctrl_linear_spd_max", "手动线速度"],
+                        ["spline_angular_spd_max", "曲线限制角速度"],
+                        ["[speaker]", ""],
+                        ["is_speaker_enable", "是否使用音乐喇叭"],
+                        ["vol_max", "音乐喇叭音量"],
+                        ["[topic]", ""],
+                        ["laser_topic_front", "前雷达数据链"],
+                        ["laser_topic_rear", "后雷达数据链"],
+                        ["[hydraulic_lifting_table]", ""],
+                        ["hydraulic_lifting_table_down_throttle_max", "最大下降油门"],
+                        ["hydraulic_lifting_table_down_throttle_min", "最小下降油门"],
+                        ["hydraulic_lifting_table_lower_limit_pose", "最低位置"],
+                        ["hydraulic_lifting_table_up_throttle_max", "最大上升油门"],
+                        ["hydraulic_lifting_table_up_throttle_min", "最小上升油门"],
+                        ["hydraulic_lifting_table_upper_limit_pose", "最高位置"],
+                        ["hydraulic_lifting_table_zero_postion", "零位编码"],
+                        ["is_enable_hydraulic_lifting_table_control", "是否使用液压举升平台"],
+                        ["[lifter_platform_control]", ""],
+                        ["acc", "加减速"],
+                        ["auto_max_lift_down_spd", "最大自动下降速度"],
+                        ["auto_max_lift_up_spd", "最大自动举升速度"],
+                        ["auto_min_lift_down_spd", "最小自动下降速度"],
+                        ["auto_min_lift_up_spd", "最小自动举升速度"],
+                        ["break_factor", "提前减速系数"],
+                        ["error_tolerance", "允许误差"],
+                        ["is_enable_lifter_platform_ctrl", "是否使用举升平台"],
+                        ["lifter_high_of_lifter_zero_to_ground", "从高度0到地面高度（方便调度指令对应真实高度）"],
+                        ["lower_limit_pose", "低位位置"],
+                        ["manual_lift_down_spd", "手动下降速度"],
+                        ["manual_lift_up_spd", "手动举升速度"],
+                        ["upper_limit_pose", "高位位置"],
+                        ["zero_postion", "零点编码值"]
+                    ],
+                    note: null
+                }
+            ]
+        },
+        {
+            fileName: "一致性标定.xls",
+            sections: [
+                {
+                    title: null,
+                    columns: ["项目", "说明"],
+                    rows: [
+                        ["重新安装雷达/调节过雷达安装位置/角度", "都需要重新去标定雷达"],
+                        ["标定方式", "要求：通过远程客户端的键盘去控制叉车标定"]
+                    ],
+                    note: null
+                }
+            ]
+        },
+        {
+            fileName: "常见故障.xls",
+            isFaultTree: true,
+            faultTree: buildTreeFromTable(defaultTable),
+            sourceTable: defaultTable,
+            tableColumns: ["一级按钮（故障代码）", "二级文本（故障提示）", "二级文本（故障原因）", "二级按钮（检查方向）", "三级按钮（处理方法）", "四级按钮（备注）"]
+        }
+    ];
+}
+
+// ============================================================
+// 2. 状态与存储
+// ============================================================
+
+const STORAGE_KEY = 'agv_config_data_v10';
+
+let filesData = [];
+let currentFileIndex = 0;
+let isAdmin = false;
+let isEditMode = false;
+let faultPath = [];
+
+function loadData() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                return parsed;
             }
         }
     } catch (e) {
-        console.warn('localStorage 加载失败:', e);
+        console.warn('读取本地数据失败，使用默认数据', e);
+    }
+    return createDefaultFiles();
+}
+
+function saveData() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(filesData));
+    } catch (e) {
+        console.warn('保存本地数据失败', e);
     }
 }
 
-// ========== Toast 提示 ==========
-function showToast(message) {
-    const toast = document.getElementById('toast');
-    toast.textContent = message;
-    toast.classList.add('show');
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 2500);
+filesData = loadData();
+
+// ============================================================
+// 3. DOM 引用
+// ============================================================
+const navList = document.getElementById('navList');
+const tableWrapper = document.getElementById('tableWrapper');
+const loginBtn = document.getElementById('loginBtn');
+const adminBadge = document.getElementById('adminBadge');
+const editToggle = document.getElementById('editToggle');
+const resetBtn = document.getElementById('resetBtn');
+const applyBtn = document.getElementById('applyBtn');
+
+// ============================================================
+// 4. 工具函数
+// ============================================================
+function stripExtension(name) {
+    return name.replace(/\.(xls|xlsx|ini)$/i, '');
 }
 
-// ========== 页面加载时恢复内容 ==========
-window.addEventListener('DOMContentLoaded', loadFromLocalStorage);
-</script>
+function escapeHtml(text) {
+    if (!text && text !== 0) return '';
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
+        .replace(/\n/g, '<br>');
+}
 
+function getCurrentFaultNode() {
+    const file = filesData[currentFileIndex];
+    if (!file || !file.isFaultTree) return null;
+    let node = file.faultTree;
+    for (const child of faultPath) {
+        const found = node.children.find(c => c.id === child.id);
+        if (found) node = found;
+        else break;
+    }
+    return node;
+}
+
+function findNodeById(root, id) {
+    if (!root) return null;
+    if (root.id === id) return root;
+    if (root.children) {
+        for (const child of root.children) {
+            const found = findNodeById(child, id);
+            if (found) return found;
+        }
+    }
+    return null;
+}
+
+// ============================================================
+// 5. 初始化
+// ============================================================
+function init() {
+    bindEvents();
+    renderNav();
+    renderFile(currentFileIndex);
+    updateAdminUI();
+}
+
+// ============================================================
+// 6. 左侧导航
+// ============================================================
+function renderNav() {
+    navList.innerHTML = '';
+    filesData.forEach((file, idx) => {
+        const div = document.createElement('div');
+        div.className = 'nav-item' + (idx === currentFileIndex ? ' active' : '');
+        div.dataset.index = idx;
+        const displayName = stripExtension(file.fileName);
+        const shortName = displayName.length > 22 ? displayName.slice(0, 20) + '…' : displayName;
+        div.innerHTML = `<i>📄</i> ${escapeHtml(shortName)}`;
+        div.title = displayName;
+        div.addEventListener('click', () => {
+            if (idx !== currentFileIndex) {
+                currentFileIndex = idx;
+                faultPath = [];
+                renderNav();
+                renderFile(currentFileIndex);
+            }
+        });
+        navList.appendChild(div);
+    });
+}
+
+// ============================================================
+// 7. 渲染文件
+// ============================================================
+function renderFile(fileIndex) {
+    const file = filesData[fileIndex];
+    if (!file) return;
+
+    if (file.isFaultTree) {
+        renderFaultTree();
+        return;
+    }
+
+    const sections = file.sections || [];
+    if (sections.length === 0) {
+        tableWrapper.innerHTML = '<div class="empty-msg">无数据</div>';
+        return;
+    }
+
+    let html = '';
+    sections.forEach((section, secIndex) => {
+        let maxCols = 0;
+        if (section.columns) {
+            maxCols = section.columns.length;
+        } else if (section.rows && section.rows.length > 0) {
+            let mc = 0;
+            section.rows.forEach(row => {
+                let last = -1;
+                for (let i = 0; i < row.length; i++) {
+                    const v = row[i];
+                    if (v !== undefined && v !== null && String(v).trim() !== '') last = i;
+                }
+                if (last + 1 > mc) mc = last + 1;
+            });
+            maxCols = mc;
+        }
+        if (maxCols === 0) maxCols = 1;
+
+        html += `<div class="section-card" data-section="${secIndex}">`;
+        html += '<table>';
+
+        if (section.title) {
+            html += `<tr class="section-header-row"><td colspan="${maxCols}">${escapeHtml(section.title)}</td></tr>`;
+        }
+
+        if (section.columns && section.columns.length > 0) {
+            html += '<tr class="column-header-row">';
+            for (let i = 0; i < maxCols; i++) {
+                const col = section.columns[i] !== undefined ? section.columns[i] : '';
+                html += `<td>${escapeHtml(col)}</td>`;
+            }
+            html += '</tr>';
+        }
+
+        if (section.rows) {
+            section.rows.forEach((row) => {
+                html += '<tr>';
+                for (let i = 0; i < maxCols; i++) {
+                    const cellValue = (row[i] !== undefined && row[i] !== null) ? row[i] : '';
+                    const displayValue = String(cellValue).replace(/<br\s*\/?>/gi, '\n');
+                    html += `<td>${escapeHtml(displayValue)}</td>`;
+                }
+                html += '</tr>';
+            });
+        }
+
+        if (section.note) {
+            const noteText = section.note.replace(/<br\s*\/?>/gi, '\n');
+            html += `<tr class="note-row"><td colspan="${maxCols}">${escapeHtml(noteText)}</td></tr>`;
+        }
+
+        html += '</table>';
+        html += '</div>';
+    });
+
+    tableWrapper.innerHTML = html;
+
+    if (isEditMode && isAdmin) {
+        enableEditing(true);
+    } else {
+        enableEditing(false);
+    }
+}
+
+// ============================================================
+// 8. 渲染常见故障
+// ============================================================
+function renderFaultTree() {
+    const file = filesData[currentFileIndex];
+    if (!file || !file.isFaultTree) return;
+
+    const currentNode = getCurrentFaultNode();
+    if (!currentNode) return;
+    const currentLevel = faultPath.length;
+
+    // 面包屑
+    let breadcrumbHtml = '<div class="breadcrumb">';
+    breadcrumbHtml += `<span class="breadcrumb-item ${faultPath.length === 0 ? 'active' : ''}" data-depth="0">${escapeHtml(file.faultTree.title)}</span>`;
+    faultPath.forEach((node, idx) => {
+        const depth = idx + 1;
+        breadcrumbHtml += `<span class="breadcrumb-sep">›</span>`;
+        const isActive = depth === faultPath.length;
+        breadcrumbHtml += `<span class="breadcrumb-item ${isActive ? 'active' : ''}" data-depth="${depth}">${escapeHtml(node.title)}</span>`;
+    });
+    const childCount = currentNode.children ? currentNode.children.length : 0;
+    breadcrumbHtml += `<span class="level-info">第 ${currentLevel + 1} 级 · ${childCount} 个按钮</span>`;
+    breadcrumbHtml += '</div>';
+
+    // 顶部文本区
+    const text = (currentNode.contentText !== undefined && currentNode.contentText !== null)
+        ? currentNode.contentText : '';
+    const isEdit = isAdmin && isEditMode;
+    const isEmpty = text.trim() === '';
+
+    let textHtml = '<div class="text-content-wrapper">';
+    textHtml += '<div class="text-content-header">';
+    textHtml += '<span>📝 说明</span>';
+    if (isEdit) {
+        textHtml += '<span class="hint">点击下方文本区域即可编辑</span>';
+    }
+    textHtml += '</div>';
+
+    if (isEmpty) {
+        if (isEdit) {
+            textHtml += `<div class="text-content-body text-empty" data-node-id="${currentNode.id}" contenteditable="true">（点击此处编辑内容）</div>`;
+        } else {
+            textHtml += `<div class="text-content-body text-empty">暂无内容</div>`;
+        }
+    } else {
+        const displayText = escapeHtml(text).replace(/\n/g, '<br>');
+        if (isEdit) {
+            textHtml += `<div class="text-content-body" data-node-id="${currentNode.id}" contenteditable="true">${displayText}</div>`;
+        } else {
+            textHtml += `<div class="text-content-body">${displayText}</div>`;
+        }
+    }
+    textHtml += '</div>';
+
+    // 按钮网格
+    let btnHtml = '<div class="btn-grid">';
+
+    if (currentNode.children && currentNode.children.length > 0) {
+        currentNode.children.forEach((child) => {
+            btnHtml += `<div class="nav-btn ${isEdit ? 'editable' : ''}" data-node-id="${child.id}">`;
+            btnHtml += `<div class="btn-title" data-node-id="${child.id}">${escapeHtml(child.title)}</div>`;
+            if (child.sub) {
+                btnHtml += `<div class="btn-sub">${escapeHtml(child.sub)}</div>`;
+            }
+            if (isEdit) {
+                btnHtml += `<span class="btn-edit-hint">✎</span>`;
+                btnHtml += `<button type="button" class="delete-btn" data-delete-id="${child.id}">删除</button>`;
+            }
+            btnHtml += '</div>';
+        });
+    }
+
+    if (isEdit) {
+        btnHtml += `<div class="add-btn-card" data-add-parent="${currentNode.id}">➕ 添加按钮</div>`;
+    }
+
+    btnHtml += '</div>';
+
+    // 根节点显示表格配置入口
+    let tableConfigHtml = '';
+    if (currentLevel === 0 && isAdmin && isEditMode) {
+        tableConfigHtml = renderTableConfig();
+    }
+
+    tableWrapper.innerHTML = breadcrumbHtml + tableConfigHtml + textHtml + btnHtml;
+
+    // 面包屑点击
+    tableWrapper.querySelectorAll('.breadcrumb-item').forEach(el => {
+        el.addEventListener('click', () => {
+            const depth = parseInt(el.dataset.depth, 10);
+            if (isNaN(depth)) return;
+            if (depth === faultPath.length) return;
+            faultPath = faultPath.slice(0, depth);
+            renderFaultTree();
+        });
+    });
+
+    // 按钮点击
+    tableWrapper.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            if (e.target.closest('.delete-btn')) return;
+            if (e.target.closest('.btn-title[contenteditable="true"]')) return;
+            const nodeId = btn.dataset.nodeId;
+            if (!nodeId) return;
+            const node = currentNode.children.find(c => c.id === nodeId);
+            if (!node) return;
+            faultPath.push(node);
+            renderFaultTree();
+        });
+    });
+
+    // 编辑模式操作
+    if (isAdmin && isEditMode) {
+        tableWrapper.querySelectorAll('.btn-title').forEach(el => {
+            el.setAttribute('contenteditable', 'true');
+            el.addEventListener('blur', () => {
+                const nodeId = el.dataset.nodeId;
+                if (!nodeId) return;
+                const node = findNodeById(currentNode, nodeId);
+                if (node) {
+                    node.title = el.innerText.trim() || '未命名';
+                    saveData();
+                }
+            });
+            el.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    el.blur();
+                }
+            });
+        });
+
+        tableWrapper.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const delId = btn.dataset.deleteId;
+                if (!delId) return;
+                if (!confirm('确定删除该按钮？其下所有子按钮也会被删除。')) return;
+                const idx = currentNode.children.findIndex(c => c.id === delId);
+                if (idx >= 0) {
+                    currentNode.children.splice(idx, 1);
+                    saveData();
+                    renderFaultTree();
+                }
+            });
+        });
+
+        tableWrapper.querySelectorAll('.add-btn-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const parentId = card.dataset.addParent;
+                const parentNode = findNodeById(currentNode, parentId) || currentNode;
+                const newTitle = prompt('请输入新按钮的名称：', '新按钮');
+                if (newTitle === null) return;
+                if (!parentNode.children) parentNode.children = [];
+                parentNode.children.push({
+                    id: 'new-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+                    title: newTitle.trim() || '新按钮',
+                    sub: '点击查看详情',
+                    children: [],
+                    contentText: ''
+                });
+                saveData();
+                renderFaultTree();
+            });
+        });
+
+        tableWrapper.querySelectorAll('.text-content-body[contenteditable="true"]').forEach(el => {
+            el.addEventListener('focus', () => {
+                if (el.innerText === '（点击此处编辑内容）') {
+                    el.innerText = '';
+                }
+            });
+            el.addEventListener('blur', () => {
+                const nodeId = el.dataset.nodeId;
+                if (!nodeId) return;
+                const node = findNodeById(currentNode, nodeId);
+                if (node) {
+                    let newText = el.innerText;
+                    if (newText.trim() === '') {
+                        node.contentText = '';
+                    } else {
+                        node.contentText = newText;
+                    }
+                    saveData();
+                }
+            });
+        });
+
+        bindTableConfigEvents();
+    }
+
+    if (isAdmin && isEditMode && file.isFaultTree) {
+        applyBtn.style.display = 'inline-flex';
+    } else {
+        applyBtn.style.display = 'none';
+    }
+}
+
+// ============================================================
+// 8.1 表格驱动配置 UI
+// ============================================================
+function renderTableConfig() {
+    const file = filesData[currentFileIndex];
+    const table = file.sourceTable || [];
+    const columns = file.tableColumns || [];
+
+    let html = '<div class="table-config-hint">';
+    html += '💡 <strong>表格驱动配置：</strong>编辑下方表格，<strong>每行代表一个检查项</strong>。';
+    html += '各列依次为：' + columns.map(c => `<code>${c}</code>`).join(' → ') + '。';
+    html += '<br>系统会自动按"故障代码"分组：<strong>一级按钮</strong>=故障代码（标题）+故障提示/原因（文本），';
+    html += '<strong>二级按钮</strong>=每个检查项（一行一个按钮），';
+    html += '<strong>三级按钮</strong>=处理方法，<strong>四级按钮</strong>=备注。';
+    html += '<br>编辑完成后点击右上角「<strong>✓ 应用到常见故障</strong>」按钮。';
+    html += '</div>';
+
+    html += '<div class="section-card editable" data-section="table-config">';
+    html += '<table>';
+    html += '<thead><tr>';
+    columns.forEach((col, i) => {
+        const width = (i === 0) ? '100px' : (i === 1 || i === 2) ? '150px' : (i === 3) ? '250px' : (i === 5) ? '200px' : 'auto';
+        html += `<th style="width:${width};">${escapeHtml(col)}</th>`;
+    });
+    html += '<th style="width:60px;">操作</th>';
+    html += '</tr></thead>';
+    html += '<tbody>';
+
+    table.forEach((row, rowIndex) => {
+        html += `<tr data-row="${rowIndex}">`;
+        for (let i = 0; i < columns.length; i++) {
+            const val = (row[i] !== undefined && row[i] !== null) ? String(row[i]) : '';
+            const displayVal = val.replace(/<br\s*\/?>/gi, '\n');
+            const cellClass = (i === 1 || i === 2) ? 'text-col' : 'level-col';
+            html += `<td class="${cellClass}" data-row="${rowIndex}" data-col="${i}" contenteditable="true">${escapeHtml(displayVal)}</td>`;
+        }
+        html += `<td style="text-align:center;vertical-align:middle;">`;
+        html += `<button type="button" class="remove-row-btn" data-remove-row="${rowIndex}">删除</button>`;
+        html += `</td>`;
+        html += '</tr>';
+    });
+
+    html += '</tbody></table>';
+    html += '</div>';
+    html += `<button type="button" class="add-row-btn" id="addRowBtn">➕ 添加一行</button>`;
+
+    return html;
+}
+
+// ============================================================
+// 8.2 表格配置事件
+// ============================================================
+function bindTableConfigEvents() {
+    const file = filesData[currentFileIndex];
+    if (!file || !file.sourceTable) {
+        file.sourceTable = [];
+    }
+
+    tableWrapper.querySelectorAll('.section-card[data-section="table-config"] td[contenteditable="true"]').forEach(td => {
+        td.addEventListener('blur', () => {
+            const row = parseInt(td.dataset.row, 10);
+            const col = parseInt(td.dataset.col, 10);
+            if (isNaN(row) || isNaN(col)) return;
+            if (!file.sourceTable[row]) {
+                file.sourceTable[row] = [];
+            }
+            let newValue = td.innerText.replace(/\n/g, '<br>');
+            file.sourceTable[row][col] = newValue;
+            saveData();
+        });
+        td.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                document.execCommand('insertLineBreak');
+            }
+        });
+    });
+
+    tableWrapper.querySelectorAll('.remove-row-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const row = parseInt(btn.dataset.removeRow, 10);
+            if (isNaN(row)) return;
+            if (!confirm('确定删除这一行？')) return;
+            file.sourceTable.splice(row, 1);
+            saveData();
+            renderFaultTree();
+        });
+    });
+
+    const addRowBtn = tableWrapper.querySelector('#addRowBtn');
+    if (addRowBtn) {
+        addRowBtn.addEventListener('click', () => {
+            const colCount = (file.tableColumns || []).length || 6;
+            const newRow = [];
+            for (let i = 0; i < colCount; i++) newRow.push('');
+            file.sourceTable.push(newRow);
+            saveData();
+            renderFaultTree();
+        });
+    }
+}
+
+// ============================================================
+// 8.3 应用表格到按钮树
+// ============================================================
+function applyTableToTree() {
+    const file = filesData[currentFileIndex];
+    if (!file || !file.isFaultTree) return;
+
+    if (!file.sourceTable || file.sourceTable.length === 0) {
+        alert('表格为空，请先填写内容。');
+        return;
+    }
+
+    const validRows = file.sourceTable.filter(row => {
+        return row && row.some(v => v && String(v).trim() !== '');
+    });
+
+    if (validRows.length === 0) {
+        alert('表格中没有有效数据。');
+        return;
+    }
+
+    file.faultTree = buildTreeFromTable(validRows);
+    faultPath = [];
+    saveData();
+
+    let leafCount = 0;
+    let maxDepth = 0;
+    (function count(node, depth) {
+        if (!node.children || node.children.length === 0) {
+            if (node.id !== 'root') {
+                leafCount++;
+                if (depth > maxDepth) maxDepth = depth;
+            }
+        } else {
+            node.children.forEach(c => count(c, depth + 1));
+        }
+    })(file.faultTree, 0);
+
+    alert(`✓ 应用成功！\n\n· 一级按钮：${file.faultTree.children.length} 个\n· 叶子节点：${leafCount} 个\n· 最大层级：${maxDepth} 级`);
+    renderFaultTree();
+}
+
+// ============================================================
+// 9. 通用编辑
+// ============================================================
+function enableEditing(enable) {
+    const file = filesData[currentFileIndex];
+    if (file && file.isFaultTree) {
+        renderFaultTree();
+        return;
+    }
+
+    const cards = tableWrapper.querySelectorAll('.section-card');
+    cards.forEach(card => {
+        if (enable && isAdmin && isEditMode) {
+            card.classList.add('editable');
+        } else {
+            card.classList.remove('editable');
+        }
+    });
+
+    const tds = tableWrapper.querySelectorAll('td');
+    tds.forEach(td => {
+        const tr = td.closest('tr');
+        if (tr && tr.classList.contains('note-row')) {
+            td.removeAttribute('contenteditable');
+            return;
+        }
+        if (enable && isAdmin && isEditMode) {
+            td.setAttribute('contenteditable', 'true');
+        } else {
+            td.removeAttribute('contenteditable');
+        }
+    });
+}
+
+// ============================================================
+// 10. 事件绑定
+// ============================================================
+function bindEvents() {
+    loginBtn.addEventListener('click', handleLogin);
+    editToggle.addEventListener('click', toggleEditMode);
+    resetBtn.addEventListener('click', handleReset);
+    applyBtn.addEventListener('click', applyTableToTree);
+
+    tableWrapper.addEventListener('blur', handleTableBlur, true);
+    tableWrapper.addEventListener('keydown', handleTableKeydown);
+}
+
+function handleLogin() {
+    if (isAdmin) {
+        isAdmin = false;
+        isEditMode = false;
+        updateAdminUI();
+        renderFile(currentFileIndex);
+        return;
+    }
+    const pwd = prompt('请输入管理员密码 (默认: admin123)', 'admin123');
+    if (pwd === 'admin123') {
+        isAdmin = true;
+        updateAdminUI();
+        alert('管理员登录成功，可点击"编辑模式"按钮进行编辑。');
+    } else if (pwd !== null) {
+        alert('密码错误');
+    }
+}
+
+function toggleEditMode() {
+    if (!isAdmin) return;
+    isEditMode = !isEditMode;
+    editToggle.classList.toggle('active', isEditMode);
+    renderFile(currentFileIndex);
+}
+
+function handleReset() {
+    if (!confirm('确定恢复默认数据？所有编辑将丢失。')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    filesData = createDefaultFiles();
+    currentFileIndex = 0;
+    faultPath = [];
+    renderNav();
+    renderFile(currentFileIndex);
+    updateAdminUI();
+    alert('已恢复默认数据');
+}
+
+function handleTableBlur(e) {
+    if (!isAdmin || !isEditMode) return;
+    const file = filesData[currentFileIndex];
+    if (file && file.isFaultTree) return;
+
+    const td = e.target.closest('td[contenteditable="true"]');
+    if (!td) return;
+
+    const sectionCard = td.closest('.section-card');
+    if (!sectionCard) return;
+    const secIndex = parseInt(sectionCard.dataset.section, 10);
+    if (isNaN(secIndex)) return;
+
+    if (!file || !file.sections || !file.sections[secIndex]) return;
+    const section = file.sections[secIndex];
+
+    const tr = td.closest('tr');
+    if (!tr) return;
+
+    if (tr.classList.contains('section-header-row')) {
+        section.title = td.innerText.replace(/\n/g, '<br>');
+        saveData();
+        return;
+    }
+    if (tr.classList.contains('note-row')) {
+        section.note = td.innerText.replace(/\n/g, '<br>');
+        saveData();
+        return;
+    }
+    if (tr.classList.contains('column-header-row')) {
+        const cellIndex = Array.from(tr.children).indexOf(td);
+        if (cellIndex < 0) return;
+        if (!section.columns) section.columns = [];
+        while (section.columns.length <= cellIndex) section.columns.push('');
+        section.columns[cellIndex] = td.innerText.replace(/\n/g, '<br>');
+        saveData();
+        return;
+    }
+
+    const allTrs = Array.from(tr.parentNode.children);
+    let trIndex = allTrs.indexOf(tr);
+    let offset = 0;
+    if (section.title) offset += 1;
+    if (section.columns && section.columns.length > 0) offset += 1;
+    const dataRowIndex = trIndex - offset;
+    if (dataRowIndex < 0 || !section.rows || !section.rows[dataRowIndex]) return;
+
+    const cellIndex = Array.from(tr.children).indexOf(td);
+    if (cellIndex < 0) return;
+
+    let newValue = td.innerText.replace(/\n/g, '<br>');
+    while (section.rows[dataRowIndex].length <= cellIndex) section.rows[dataRowIndex].push('');
+    section.rows[dataRowIndex][cellIndex] = newValue;
+    saveData();
+}
+
+function handleTableKeydown(e) {
+    if (!isAdmin || !isEditMode) return;
+    const td = e.target.closest('td[contenteditable="true"]');
+    if (td && e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        document.execCommand('insertLineBreak');
+    }
+}
+
+// ============================================================
+// 11. 管理员 UI 更新
+// ============================================================
+function updateAdminUI() {
+    if (isAdmin) {
+        loginBtn.innerHTML = '<span>🔓</span> 注销管理员';
+        adminBadge.innerHTML = '<span class="logged-in">✓ 管理员已登录</span><span>可编辑内容</span>';
+        editToggle.disabled = false;
+        resetBtn.style.display = 'inline-flex';
+    } else {
+        loginBtn.innerHTML = '<span>🔐</span> 管理员登录';
+        adminBadge.innerHTML = '<span>未登录 · 只读模式</span>';
+        editToggle.disabled = true;
+        editToggle.classList.remove('active');
+        isEditMode = false;
+        resetBtn.style.display = 'none';
+        applyBtn.style.display = 'none';
+    }
+}
+
+// ============================================================
+// 12. 启动
+// ============================================================
+init();
+</script>
 </body>
 </html>
